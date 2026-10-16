@@ -1,2 +1,1 @@
-# phone-village
-Phone marketplace project structure
+# Phone Market
