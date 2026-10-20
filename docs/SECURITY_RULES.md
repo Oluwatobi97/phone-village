@@ -1,1 +1,12 @@
-# SECURITY_RULES
+# Security and Privacy Rules
+- Verify authentication and permissions server-side on every protected operation.
+- Never trust client-provided role, user ID, owner ID, price, or status without validation.
+- Use established password/session libraries; never store plaintext passwords.
+- Validate and normalise input; use parameterised database operations; safely render user content.
+- Validate upload size, content type, and file signature where practical; use controlled storage.
+- Rate-limit auth, messaging, offers, reports, and other abuse-prone routes.
+- Only placeholders belong in `.env.example`; never commit or log credentials, tokens, or real customer data.
+- If a secret leaks, stop, notify owner, and rotate/revoke it; deleting text is not enough.
+- Minimise personal data and redact logs/screenshots/fixtures.
+- Never fabricate verification, inspection, reviews, guarantees, or buyer protection.
+- Payments, escrow, identity verification, automated fraud decisions, and production migrations require explicit human review and risk assessment.
