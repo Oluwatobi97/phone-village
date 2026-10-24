@@ -37,3 +37,67 @@
 - Decisions/access pending: backend framework/API style and remaining stack choices.
 - Next steps: human review and separate backend stack confirmation.
 - Acceptance criteria remaining: backend portion of PV-AI-002 remains open; frontend setup acceptance criteria are met.
+
+## Latest handoff — PV-AI-MIGRATE
+
+- Status: DONE
+- Goal: Fix imported applet configuration to boot cleanly in AI Studio environment.
+- Work verified: root workspace configuration added for `frontend`; Turbopack root configured to repository root; `output: "standalone"` added; dev server configured for `0.0.0.0:3000`.
+- Branch/files: `review-branch`; `package.json`, `frontend/package.json`, `frontend/next.config.ts`, `metadata.json`, and tracking logs.
+- Checks and results: `install_applet_dependencies` succeeded; `compile_applet` passed (`next build` compiled successfully); `lint_applet` passed (`next lint` succeeded with no errors).
+- Risks/limitations: Backend service remains scaffolded/unselected per DEC-003.
+- Decisions/access pending: None for the migration task.
+- Next steps: proceed with product and backend architectural decisions as outlined in the task queue.
+- Acceptance criteria remaining: None for migration. All acceptance criteria met.
+
+## Latest handoff — PV-AI-LANDING
+
+- Status: DONE
+- Goal: Create a high-fidelity landing page for Phone Village tailored to Nigerian phone buyers and sellers.
+- Work verified: Created responsive Next.js landing page with interactive Phone Finder Wizard, NGN price slider, brand/condition filters, direct store WhatsApp/Call modals, side-by-side Deal Comparison matrix, Verified Dealer directory, and IMEICheck safety tips.
+- Branch/files: `review-branch`; `frontend/src/app/page.tsx`, `layout.tsx`, `globals.css`, `components/*`, `data/mockData.ts`, `types/phone.ts`, `docs/AI_WORK_LOG.md`, `docs/AI_HANDOFF_LOG.md`.
+- Checks and results: `compile_applet` passed (`next build` compiled cleanly); `lint_applet` passed with 0 errors. Dev server running on port 3000.
+- Risks/limitations: Mock inventory database used until backend persistence layer is provisioned.
+- Decisions/access pending: None for landing page.
+- Next steps: Review landing page experience and connect real database endpoints when backend framework is selected.
+- Acceptance criteria remaining: None. All landing page requirements fulfilled.
+
+## Latest handoff — PV-AI-3D-GREEN
+
+- Status: DONE
+- Goal: Apply pure Green & White design system, Dark Mode support, 3D Three.js smartphone canvas, and 3D card tilt animations.
+- Work verified: Created Three.js 3D viewport (`Phone3DCanvas.tsx`), 3D tilt card physics (`TiltCard.tsx`), Dark Mode toggle in top bar, and strict Green & White theme across Light and Dark modes.
+- Branch/files: `review-branch`; `frontend/src/components/*`, `frontend/src/app/page.tsx`, `docs/AI_WORK_LOG.md`, `docs/AI_HANDOFF_LOG.md`.
+- Checks and results: `compile_applet` passed (`next build` compiled cleanly); `lint_applet` passed with 0 errors. Dev server active on port 3000.
+- Risks/limitations: None.
+- Decisions/access pending: None.
+- Next steps: Final presentation to user.
+
+## Latest handoff — PV-AI-AUTH
+
+- Status: DONE
+- Goal: Implement Register (`/register`) and Login (`/login`) pages with role management, Green & White design system, and AuthContext integration.
+- Work verified: Created `/login` and `/register` App Router pages with Buyer and Verified Dealer tabs, password toggles, `+234` phone formatting, instant demo login shortcuts, and Header account status badge integration.
+- Branch/files: `review-branch`; `frontend/src/app/login/page.tsx`, `frontend/src/app/register/page.tsx`, `frontend/src/context/AuthContext.tsx`, `frontend/src/components/Header.tsx`, `docs/AI_WORK_LOG.md`, `docs/AI_HANDOFF_LOG.md`.
+- Checks and results: `compile_applet` passed (`next build` compiled cleanly); `lint_applet` passed with 0 errors. Dev server active on port 3000.
+- Risks/limitations: None.
+- Decisions/access pending: None.
+- Next steps: User review of registration & login experience.
+
+## Latest handoff — PV-AI-PAGES4-9
+
+- Status: DONE
+- Goal: Implement Pages 4 through 9 of Phone Village (Password Recovery, Homepage, Browse Marketplace, Phone Details, Seller Onboarding, and Create Phone Listing).
+- Work verified:
+  - Page 4: `/forgot-password` & `/reset-password`
+  - Page 5: Homepage (`/`) with 3D Smartphone Canvas, Phone Finder, NGN Listings, Verified Dealers, Deal Matrix & Safety Rules
+  - Page 6: Browse Marketplace (`/phones`) with multi-faceted search & filters, 3D tilt cards, and quick inspect modal
+  - Page 7: Phone Details (`/phones/[id]`) with image gallery, specs, direct WhatsApp/Call contact, IMEICheck badge, favourites toggle, and related listings
+  - Page 8: Seller Onboarding (`/seller/onboarding`) with Individual vs Dealer store profile registration, tech hub region selection, contact info, and IMEICheck agreement
+  - Page 9: Create Phone Listing (`/sell/phones/new`) with eligibility pre-check, specs, Naira price formatting, defect disclosure, photo gallery with preset stock pickers, pickup location, live buyer preview modal, and submission handler
+- Branch/files: `review-branch`; `frontend/src/app/*`, `frontend/src/components/*`, `frontend/src/context/AuthContext.tsx`, `docs/AI_WORK_LOG.md`, `docs/AI_HANDOFF_LOG.md`.
+- Checks and results: `compile_applet` passed (`next build` compiled all static and dynamic routes successfully); `lint_applet` passed with 0 errors. Dev server running on port 3000.
+- Risks/limitations: None.
+- Decisions/access pending: None.
+- Next steps: Review complete frontend user experience.
+- Acceptance criteria remaining: None. All requested pages built and verified.
