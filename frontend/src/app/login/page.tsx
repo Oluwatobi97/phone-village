@@ -18,6 +18,15 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const getRedirectTarget = (userRole: 'buyer' | 'dealer') => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const target = params.get('redirect');
+      if (target) return target;
+    }
+    return userRole === 'dealer' ? '/sell/phones/new' : '/phones';
+  };
+
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
@@ -44,18 +53,18 @@ export default function LoginPage() {
         verified: role === 'dealer',
       });
 
-      router.push('/');
+      router.push(getRedirectTarget(role));
     }, 800);
   };
 
   const handleDemoBuyer = () => {
     demoLoginBuyer();
-    router.push('/');
+    router.push(getRedirectTarget('buyer'));
   };
 
   const handleDemoDealer = () => {
     demoLoginDealer();
-    router.push('/');
+    router.push(getRedirectTarget('dealer'));
   };
 
   return (

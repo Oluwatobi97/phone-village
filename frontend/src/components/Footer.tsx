@@ -1,17 +1,13 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 
 interface FooterProps {
   darkMode?: boolean;
 }
 
 export default function Footer({ darkMode = false }: FooterProps) {
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  };
-
   return (
     <footer className={`py-12 border-t text-xs transition-colors ${
       darkMode 
@@ -24,55 +20,71 @@ export default function Footer({ darkMode = false }: FooterProps) {
           
           {/* Brand Col */}
           <div className="space-y-3 md:col-span-1">
-            <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <div className="w-7 h-7 rounded bg-emerald-600 flex items-center justify-center text-white font-black text-xs">
                 PV
               </div>
               <span className="text-base font-extrabold text-white tracking-tight">Phone Village</span>
-            </div>
+            </Link>
             <p className="text-emerald-300 leading-relaxed text-[11px]">
               Nigeria&apos;s premier marketplace for discovering, evaluating, and purchasing smartphones from verified physical dealers in Lagos, Abuja, and Port Harcourt.
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* Marketplace Navigation */}
           <div className="space-y-2">
             <h4 className="text-xs font-extrabold uppercase tracking-wider text-white">Marketplace</h4>
             <ul className="space-y-1.5 text-emerald-200">
               <li>
-                <button onClick={() => scrollTo('listings-section')} className="hover:text-emerald-400 transition-colors cursor-pointer">
-                  Featured Listings
-                </button>
+                <Link href="/phones" className="hover:text-emerald-400 transition-colors">
+                  Browse All Phones
+                </Link>
               </li>
               <li>
-                <button onClick={() => scrollTo('phone-finder')} className="hover:text-emerald-400 transition-colors cursor-pointer">
-                  3D Phone Finder
-                </button>
+                <Link href="/seller/onboarding" className="hover:text-emerald-400 transition-colors">
+                  Sell a Phone
+                </Link>
               </li>
               <li>
-                <button onClick={() => scrollTo('deal-comparison')} className="hover:text-emerald-400 transition-colors cursor-pointer">
-                  Deal Comparison
-                </button>
+                <Link href="/seller/listings" className="hover:text-emerald-400 transition-colors">
+                  Seller Dashboard
+                </Link>
               </li>
             </ul>
           </div>
 
-          {/* Locations */}
+          {/* Account & Buyer Links */}
           <div className="space-y-2">
-            <h4 className="text-xs font-extrabold uppercase tracking-wider text-white">Tech Hubs</h4>
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-white">Buyer Hub</h4>
             <ul className="space-y-1.5 text-emerald-200">
-              <li>Computer Village, Ikeja (Lagos)</li>
-              <li>Victoria Island & Lekki (Lagos)</li>
-              <li>Wuse II Crescent (Abuja)</li>
-              <li>Garrick / Ikwerre Rd (Port Harcourt)</li>
+              <li>
+                <Link href="/account" className="hover:text-emerald-400 transition-colors">
+                  My Account Profile
+                </Link>
+              </li>
+              <li>
+                <Link href="/account/favourites" className="hover:text-emerald-400 transition-colors">
+                  Saved Phones
+                </Link>
+              </li>
+              <li>
+                <Link href="/account/messages" className="hover:text-emerald-400 transition-colors">
+                  Enquiries & Messages
+                </Link>
+              </li>
+              <li>
+                <Link href="/account/settings" className="hover:text-emerald-400 transition-colors">
+                  Account Settings
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Trust Guarantee */}
+          {/* Trust Guarantee & Hubs */}
           <div className="space-y-2">
             <h4 className="text-xs font-extrabold uppercase tracking-wider text-white">Trust & Verification</h4>
             <p className="text-[11px] text-emerald-300 leading-relaxed">
-              Phone Village enforces physical store auditing and IMEICheck standards. Always inspect devices in person before making payment.
+              Phone Village enforces physical store auditing and IMEICheck standards across Computer Village (Ikeja), Wuse II (Abuja), and Garrick (Port Harcourt).
             </p>
           </div>
 
@@ -82,11 +94,17 @@ export default function Footer({ darkMode = false }: FooterProps) {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-emerald-400">
           <p>© {new Date().getFullYear()} Phone Village Nigeria. All rights reserved.</p>
           <div className="flex items-center gap-4 text-emerald-300">
-            <span>Terms of Service</span>
+            <Link href="/account/settings" className="hover:text-emerald-200 transition-colors">
+              Terms of Service
+            </Link>
             <span>·</span>
-            <span>Privacy Policy</span>
+            <Link href="/account/settings" className="hover:text-emerald-200 transition-colors">
+              Privacy Policy
+            </Link>
             <span>·</span>
-            <span>Safety Policy</span>
+            <Link href="/account/settings" className="hover:text-emerald-200 transition-colors">
+              Safety Policy
+            </Link>
           </div>
         </div>
 
@@ -94,3 +112,4 @@ export default function Footer({ darkMode = false }: FooterProps) {
     </footer>
   );
 }
+

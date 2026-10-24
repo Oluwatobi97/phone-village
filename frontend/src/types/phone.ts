@@ -23,6 +23,7 @@ export interface PhoneListing {
   reviewCount: number;
   image: string;
   description: string;
+  status?: 'ACTIVE' | 'INACTIVE' | 'SOLD';
   features: string[];
   specs: {
     display: string;

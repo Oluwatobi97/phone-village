@@ -24,6 +24,15 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const getRedirectTarget = (type: 'buyer' | 'dealer') => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const target = params.get('redirect');
+      if (target) return target;
+    }
+    return type === 'dealer' ? '/seller/onboarding' : '/phones';
+  };
+
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
@@ -54,7 +63,7 @@ export default function RegisterPage() {
         verified: accountType === 'dealer',
       });
 
-      router.push('/');
+      router.push(getRedirectTarget(accountType));
     }, 1000);
   };
 

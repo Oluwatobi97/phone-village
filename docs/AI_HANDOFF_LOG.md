@@ -101,3 +101,37 @@
 - Decisions/access pending: None.
 - Next steps: Review complete frontend user experience.
 - Acceptance criteria remaining: None. All requested pages built and verified.
+
+## Latest handoff — PV-AI-REDIRECTS
+
+- Status: DONE
+- Goal: Configure automatic context-aware redirection upon registration or sign in.
+- Work verified:
+  - When a buyer logs in or registers: Redirected to Browse Marketplace (`/phones`).
+  - When a dealer/seller registers: Redirected to Seller Onboarding (`/seller/onboarding`).
+  - When a dealer/seller logs in: Redirected to Create Phone Listing (`/sell/phones/new`).
+  - Respects explicit `?redirect=` URL query parameter when present.
+- Branch/files: `review-branch`; `frontend/src/app/login/page.tsx`, `frontend/src/app/register/page.tsx`, `docs/AI_WORK_LOG.md`, `docs/AI_HANDOFF_LOG.md`.
+- Checks and results: `compile_applet` passed (`next build` compiled cleanly); `lint_applet` passed with 0 errors.
+- Risks/limitations: None.
+- Decisions/access pending: None.
+- Next steps: Ready for user testing.
+
+## Latest handoff — PV-AI-PAGES10-16
+
+- Status: DONE
+- Goal: Complete frontend UI implementation for Pages 10 through 16.
+- Work verified:
+  - Page 10: `/seller/onboarding`
+  - Page 11: `/sell/phones/new`
+  - Page 12: `/seller/listings`
+  - Page 13: `/account`
+  - Page 14: `/account/favourites`
+  - Page 15: `/account/messages`
+  - Page 16: `/account/settings`
+- Branch/files: `review-branch`; `frontend/src/app/*`, `frontend/src/components/Header.tsx`, `frontend/src/types/phone.ts`, `docs/AI_WORK_LOG.md`, `docs/AI_HANDOFF_LOG.md`.
+- Checks and results: `compile_applet` passed cleanly (`next build` compiled all routes); `lint_applet` passed with 0 errors.
+- Risks/limitations: None.
+- Decisions/access pending: None.
+- Next steps: Complete frontend walkthrough and review.
+- Acceptance criteria remaining: None. All 7 pages created and verified.

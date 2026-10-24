@@ -12,13 +12,6 @@ interface HeaderProps {
 export default function Header({ darkMode, onToggleDarkMode }: HeaderProps) {
   const { user, logout } = useAuth();
 
-  const scrollTo = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
     <header className={`sticky top-0 z-40 border-b backdrop-blur-md transition-colors ${
       darkMode 
@@ -41,36 +34,39 @@ export default function Header({ darkMode, onToggleDarkMode }: HeaderProps) {
         <nav className={`hidden md:flex items-center gap-6 text-sm font-medium ${
           darkMode ? 'text-emerald-200' : 'text-emerald-900'
         }`}>
-          <button 
-            onClick={() => scrollTo('listings-section')} 
-            className="hover:text-emerald-500 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+          <Link 
+            href="/phones" 
+            className="hover:text-emerald-500 transition-colors whitespace-nowrap shrink-0"
           >
-            Discover
-          </button>
-          <button 
-            onClick={() => scrollTo('phone-finder')} 
-            className="hover:text-emerald-500 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            Marketplace
+          </Link>
+          <Link 
+            href="/account/favourites" 
+            className="hover:text-emerald-500 transition-colors whitespace-nowrap shrink-0"
           >
-            Phone Finder
-          </button>
-          <button 
-            onClick={() => scrollTo('deal-comparison')} 
-            className="hover:text-emerald-500 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            Saved Phones
+          </Link>
+          <Link 
+            href="/account/messages" 
+            className="hover:text-emerald-500 transition-colors whitespace-nowrap shrink-0"
           >
-            Deal Matrix
-          </button>
-          <button 
-            onClick={() => scrollTo('verified-sellers')} 
-            className="hover:text-emerald-500 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-          >
-            Verified Dealers
-          </button>
-          <button 
-            onClick={() => scrollTo('safety-guide')} 
-            className="hover:text-emerald-500 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-          >
-            Safety Rules
-          </button>
+            Enquiries
+          </Link>
+          {user?.role === 'dealer' || user?.storeName ? (
+            <Link 
+              href="/seller/listings" 
+              className="hover:text-emerald-500 transition-colors whitespace-nowrap shrink-0 font-bold text-emerald-400"
+            >
+              My Listings
+            </Link>
+          ) : (
+            <Link 
+              href="/seller/onboarding" 
+              className="hover:text-emerald-500 transition-colors whitespace-nowrap shrink-0"
+            >
+              Start Selling
+            </Link>
+          )}
         </nav>
 
         {/* Zone 3: User Auth / Account Badge & Dark Mode */}
@@ -88,13 +84,16 @@ export default function Header({ darkMode, onToggleDarkMode }: HeaderProps) {
 
           {user ? (
             <div className="flex items-center gap-2">
-              <div className={`px-2.5 py-1 rounded-lg border text-xs font-bold ${
-                darkMode ? 'bg-emerald-900 border-emerald-700 text-white' : 'bg-emerald-100 border-emerald-200 text-emerald-950'
-              }`}>
-                <span className="text-emerald-600 mr-1">●</span>
+              <Link 
+                href="/account"
+                className={`px-2.5 py-1 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-colors ${
+                  darkMode ? 'bg-emerald-900 border-emerald-700 text-white hover:bg-emerald-800' : 'bg-emerald-100 border-emerald-200 text-emerald-950 hover:bg-emerald-200'
+                }`}
+              >
+                <span className="text-emerald-500">👤</span>
                 <span>{user.storeName || user.name}</span>
-                {user.verified && <span className="ml-1 text-[10px] text-emerald-500 font-extrabold">(Verified)</span>}
-              </div>
+                {user.verified && <span className="text-[10px] text-emerald-400 font-extrabold">(Verified)</span>}
+              </Link>
 
               <button
                 onClick={logout}
