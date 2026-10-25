@@ -1,175 +1,155 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import Phone3DCanvas from './Phone3DCanvas';
 
 interface HeroProps {
   darkMode: boolean;
-  onSearchFilter: (filters: { maxPrice: number; brand: string; condition: string }) => void;
+  onSearch: (query: string) => void;
 }
 
-export default function Hero({ darkMode, onSearchFilter }: HeroProps) {
-  const [maxPrice, setMaxPrice] = useState<number>(1500000);
-  const [selectedBrand, setSelectedBrand] = useState<string>('All');
-  const [selectedCondition, setSelectedCondition] = useState<string>('All');
+export default function Hero({ darkMode, onSearch }: HeroProps) {
+  const [searchInput, setSearchInput] = useState('');
 
-  const handleFinderSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearchFilter({
-      maxPrice,
-      brand: selectedBrand,
-      condition: selectedCondition,
-    });
-    const el = document.getElementById('listings-section');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const formatNaira = (amount: number) => {
-    return '₦' + amount.toLocaleString('en-NG');
+    onSearch(searchInput);
   };
 
   return (
-    <section id="phone-finder" className={`relative overflow-hidden py-12 lg:py-16 transition-colors ${
+    <section className={`relative overflow-hidden pt-8 pb-16 lg:pt-12 lg:pb-20 border-b transition-colors ${
       darkMode 
-        ? 'bg-[#021B12] text-white border-b border-emerald-900' 
-        : 'bg-emerald-950 text-white border-b border-emerald-900'
+        ? 'bg-gradient-to-b from-[#021B12] via-[#032318] to-[#021B12] border-emerald-950 text-white' 
+        : 'bg-gradient-to-b from-emerald-50/60 via-white to-emerald-50/30 border-emerald-100 text-emerald-950'
     }`}>
-      {/* Luminous Emerald Gradient Background Glow */}
-      <div className="absolute inset-0 bg-radial from-emerald-600/20 via-transparent to-transparent opacity-60 pointer-events-none" />
+      {/* Background glow effects */}
+      <div className="absolute top-10 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
-          {/* Left Column: Value Proposition & Interactive 3D Canvas */}
-          <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-300 bg-emerald-900/80 border border-emerald-700/80 px-3 py-1.5 rounded-full shadow-sm">
+          {/* Left Column: Copy & Value Proposition */}
+          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+            
+            {/* Pill Tag */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-extrabold bg-emerald-900/40 text-emerald-300 border border-emerald-700/60 backdrop-blur-md">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Nigeria&apos;s Pure Green & White Phone Hub</span>
+              <span>Direct Nigeria Tech Hub Connection · 100% Verified Stores</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white text-balance leading-tight">
-              Discover Trustworthy Phones & Verified Dealers
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+              Buy & Sell Phones Safely Across <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200 bg-clip-text text-transparent">Nigeria Tech Hubs</span>
             </h1>
 
-            <p className="text-emerald-100 text-sm sm:text-base leading-relaxed max-w-xl">
-              Compare prices across <strong className="text-white font-bold">Computer Village Ikeja</strong>, Victoria Island, Abuja, and Port Harcourt with 3D device inspection and IMEICheck safety guarantees.
+            <p className="text-sm sm:text-base text-emerald-200/90 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
+              Skip the middleman scams. Browse authentic smartphones directly from certified brick-and-mortar stores in <strong className="text-emerald-300 font-bold">Computer Village Ikeja</strong>, <strong className="text-emerald-300 font-bold">Banex Plaza Abuja</strong>, and <strong className="text-emerald-300 font-bold">Garrison Port Harcourt</strong>.
             </p>
 
-            {/* Interactive 3D Phone Model Viewport */}
-            <div className="p-3 bg-emerald-900/40 border border-emerald-700/60 rounded-2xl backdrop-blur-md shadow-2xl">
-              <div className="flex items-center justify-between px-3 py-1.5 border-b border-emerald-800 text-xs font-semibold text-emerald-300">
-                <span>Interactive 3D Smartphone Viewport</span>
-                <span className="text-[10px] text-emerald-400">Drag to Rotate 360°</span>
+            {/* Live Search Bar */}
+            <form onSubmit={handleSubmit} className="max-w-lg mx-auto lg:mx-0">
+              <div className={`p-1.5 rounded-2xl border shadow-xl flex items-center gap-2 backdrop-blur-md transition-colors ${
+                darkMode ? 'bg-emerald-950/80 border-emerald-800' : 'bg-white border-emerald-200 shadow-emerald-900/5'
+              }`}>
+                <div className="pl-3 text-lg opacity-70">🔍</div>
+                <input
+                  type="text"
+                  placeholder="Search iPhone 15, S24 Ultra, Camon 30, UK Used..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="w-full bg-transparent text-xs sm:text-sm font-semibold outline-none placeholder:text-emerald-300/50 min-h-[44px]"
+                />
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm rounded-xl transition-all shadow-md shadow-emerald-700/30 shrink-0 min-h-[44px]"
+                >
+                  Search
+                </button>
               </div>
-              <Phone3DCanvas darkMode={darkMode} />
+            </form>
+
+            {/* Popular quick links */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1 text-xs">
+              <span className="text-emerald-400/80 font-bold">Popular:</span>
+              <button
+                onClick={() => onSearch('iPhone')}
+                className="px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-300 hover:border-emerald-500 text-[11px] font-semibold"
+              >
+                iPhone 15 Pro
+              </button>
+              <button
+                onClick={() => onSearch('Samsung')}
+                className="px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-300 hover:border-emerald-500 text-[11px] font-semibold"
+              >
+                Samsung S24
+              </button>
+              <button
+                onClick={() => onSearch('UK Used')}
+                className="px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-300 hover:border-emerald-500 text-[11px] font-semibold"
+              >
+                UK Used 90%+ Battery
+              </button>
+              <button
+                onClick={() => onSearch('Pixel')}
+                className="px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-300 hover:border-emerald-500 text-[11px] font-semibold"
+              >
+                Pixel 8
+              </button>
             </div>
+
+            {/* Trust Badges Bar */}
+            <div className="grid grid-cols-3 gap-3 pt-4 border-t border-emerald-900/60 text-left">
+              <div className="p-2 sm:p-3 rounded-xl bg-emerald-950/40 border border-emerald-900/60">
+                <p className="text-base sm:text-lg font-black text-emerald-400">100%</p>
+                <p className="text-[10px] sm:text-xs text-emerald-200/80 font-medium leading-tight">Physical Verified Store Locations</p>
+              </div>
+              <div className="p-2 sm:p-3 rounded-xl bg-emerald-950/40 border border-emerald-900/60">
+                <p className="text-base sm:text-lg font-black text-emerald-400">₦0 Fee</p>
+                <p className="text-[10px] sm:text-xs text-emerald-200/80 font-medium leading-tight">Direct WhatsApp & In-Store Purchase</p>
+              </div>
+              <div className="p-2 sm:p-3 rounded-xl bg-emerald-950/40 border border-emerald-900/60">
+                <p className="text-base sm:text-lg font-black text-emerald-400">IMEI Safe</p>
+                <p className="text-[10px] sm:text-xs text-emerald-200/80 font-medium leading-tight">Free Battery & Blacklist Check Guide</p>
+              </div>
+            </div>
+
           </div>
 
-          {/* Right Column: Interactive Phone Finder Wizard */}
-          <div className="lg:col-span-6">
-            <div className={`border rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-md transition-colors ${
-              darkMode 
-                ? 'bg-emerald-900/60 border-emerald-700/80' 
-                : 'bg-emerald-900/90 border-emerald-700/80'
-            }`}>
-              <div className="flex items-center justify-between border-b border-emerald-800 pb-4 mb-6">
-                <div>
-                  <h2 className="text-lg font-bold text-white">Interactive Phone Finder</h2>
-                  <p className="text-xs text-emerald-200">Budget, brand, and condition filter matrix</p>
+          {/* Right Column: 3D Smartphone Interactive Canvas */}
+          <div className="lg:col-span-5 flex justify-center">
+            <div className="w-full max-w-sm sm:max-w-md p-4 rounded-3xl bg-emerald-950/30 border border-emerald-800/60 backdrop-blur-md shadow-2xl relative">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                  <span className="text-xs font-black tracking-wider uppercase text-emerald-300">
+                    Live 3D Hardware Inspector
+                  </span>
                 </div>
-                <span className="text-xs font-mono font-bold text-emerald-300 bg-emerald-950 px-2.5 py-1 rounded border border-emerald-700">
-                  Green & White Mode
+                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-900/80 px-2 py-0.5 rounded-md border border-emerald-700">
+                  WebGL 60FPS
                 </span>
               </div>
 
-              <form onSubmit={handleFinderSubmit} className="space-y-6">
-                {/* Budget Slider */}
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-emerald-200">
-                      Maximum Budget Limit
-                    </label>
-                    <span className="text-lg font-extrabold text-emerald-300 font-mono tabular-nums">
-                      {formatNaira(maxPrice)}
-                    </span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min={50000} 
-                    max={1500000} 
-                    step={25000} 
-                    value={maxPrice} 
-                    onChange={(e) => setMaxPrice(Number(e.target.value))}
-                    className="w-full h-2.5 bg-emerald-950 rounded-lg appearance-none cursor-pointer accent-emerald-400"
-                  />
-                  <div className="flex justify-between text-[11px] text-emerald-300 mt-1 font-mono">
-                    <span>₦50,000</span>
-                    <span>₦750,000</span>
-                    <span>₦1,500,000+</span>
-                  </div>
-                </div>
+              {/* Three.js Canvas */}
+              <Phone3DCanvas />
 
-                {/* Brand Selector */}
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-emerald-200 mb-2">
-                    Preferred Smartphone Brand
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {['All', 'Apple', 'Samsung', 'Tecno', 'Infinix', 'Xiaomi'].map((brand) => (
-                      <button
-                        key={brand}
-                        type="button"
-                        onClick={() => setSelectedBrand(brand)}
-                        className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                          selectedBrand === brand
-                            ? 'bg-emerald-400 text-emerald-950 font-bold shadow-md scale-105'
-                            : 'bg-emerald-950/80 text-emerald-200 hover:bg-emerald-800 hover:text-white'
-                        }`}
-                      >
-                        {brand}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Condition Selector */}
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-emerald-200 mb-2">
-                    Device Condition
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { id: 'All', label: 'Any Condition' },
-                      { id: 'Brand New', label: 'Brand New' },
-                      { id: 'UK Used', label: 'UK Used' },
-                    ].map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => setSelectedCondition(item.id)}
-                        className={`py-2 px-3 text-xs font-semibold rounded-lg border text-center transition-all cursor-pointer ${
-                          selectedCondition === item.id
-                            ? 'bg-emerald-400 border-emerald-300 text-emerald-950 font-bold shadow-md'
-                            : 'border-emerald-800 bg-emerald-950/80 text-emerald-200 hover:bg-emerald-800'
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Search Action Button */}
-                <button
-                  type="submit"
-                  className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-extrabold text-sm rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer transform hover:-translate-y-0.5"
+              {/* Action shortcuts */}
+              <div className="mt-4 pt-3 border-t border-emerald-900/60 flex items-center justify-between text-xs">
+                <Link
+                  href="/phones"
+                  className="font-extrabold text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <span>Filter Phones Under {formatNaira(maxPrice)}</span>
-                </button>
-              </form>
+                  <span>Browse 150+ Flagships</span>
+                  <span>→</span>
+                </Link>
+                <Link
+                  href="/sell/phones/new"
+                  className="font-extrabold text-white bg-emerald-700/80 hover:bg-emerald-600 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  Sell Phone
+                </Link>
+              </div>
             </div>
           </div>
 

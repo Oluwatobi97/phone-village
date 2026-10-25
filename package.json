@@ -1,5 +1,6 @@
 {
-  "name": "phone-village",
+  "name": "phone-village-monorepo",
+  "version": "1.0.0",
   "private": true,
   "workspaces": [
     "frontend"
@@ -11,9 +12,12 @@
     "lint": "npm run lint --workspace=frontend"
   },
   "dependencies": {
-    "three": "^0.186.1"
+    "@neondatabase/serverless": "^1.2.0",
+    "dotenv": "^18.0.9",
+    "drizzle-orm": "^0.45.4"
   },
   "devDependencies": {
-    "@types/three": "^0.186.0"
+    "drizzle-kit": "^0.31.11",
+    "tsx": "^4.23.15"
   }
 }

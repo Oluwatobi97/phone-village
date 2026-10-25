@@ -1,47 +1,239 @@
-# Phone Village — Database Specification
+# Phone Village — Database Schema Specification (Phase 2 Proposal)
 
-## Database Architecture
-- **Framework & Runtime**: Next.js App Router API Routes (`/src/app/api/...`).
-- **Store Implementation**: Thread-safe in-memory data store with file/ORM persistence fallback (`/src/lib/authStore.ts`).
+*Database Engine: PostgreSQL 15+*  
+*ORM / Query Layer: Drizzle ORM*
 
-## Entity Schemas
+---
 
-### 1. `UserAccount`
-| Field | Type | Description | Constraints |
-|---|---|---|---|
-| `id` | string | Unique user identifier (`usr_...`) | PRIMARY KEY |
-| `email` | string | User email address | UNIQUE |
-| `normalizedEmail` | string | Lowercased, trimmed email | UNIQUE, INDEX |
-| `phone` | string | User contact phone (+234) | UNIQUE |
-| `fullName` | string | Full display name | REQUIRED |
-| `passwordHash` | string | PBKDF2 / SHA-512 salted digest | REQUIRED |
-| `role` | AccountRole | `BUYER` \| `DEALER` \| `ADMIN` | DEFAULT 'BUYER' |
-| `status` | AccountStatus | `UNVERIFIED` \| `VERIFIED` \| `SUSPENDED` | DEFAULT 'UNVERIFIED' |
-| `emailVerified` | boolean | Email verification flag | DEFAULT false |
-| `createdAt` | ISO string | Registration timestamp | REQUIRED |
-| `updatedAt` | ISO string | Last modification timestamp | REQUIRED |
+## 1. Relational Entity Relationship Diagram (ERD)
 
-### 2. `SellerProfile`
-| Field | Type | Description | Constraints |
-|---|---|---|---|
-| `id` | string | Unique seller identifier (`seller_...`) | PRIMARY KEY |
-| `userId` | string | Reference to `UserAccount.id` | UNIQUE, FOREIGN KEY |
-| `sellerType` | SellerType | `INDIVIDUAL` \| `DEALER` | REQUIRED |
-| `storeName` | string | Business/Display store name | REQUIRED |
-| `ownerName` | string | Store manager / Owner name | REQUIRED |
-| `contactPhone` | string | Contact phone number | REQUIRED |
-| `whatsappPhone` | string | WhatsApp direct chat phone | REQUIRED |
-| `techRegion` | string | Lagos \| Abuja \| Port Harcourt \| Ibadan | REQUIRED |
-| `physicalAddress` | string | Physical store address | REQUIRED |
-| `cacRegistrationNumber` | string | Optional CAC ID | OPTIONAL |
-| `status` | SellerOnboardingStatus | `NOT_ONBOARDED` \| `APPROVED` \| `SUSPENDED` | DEFAULT 'APPROVED' |
-| `termsAccepted` | boolean | Safety terms agreement | REQUIRED |
+```
+[ users ] (1) ──── (0..1) [ seller_profiles ] (1) ──── (0..*) [ seller_documents ]
+    │                            │
+    │ (1..*)                     │ (1..*)
+    ▼                            ▼
+[ favourites ]              [ phone_listings ] (1) ──── (1..*) [ listing_images ]
+    │                            ▲        │
+    │ (ref)                      │ (ref)  │ (1..*)
+    └────────────────────────────┘        ▼
+                                   [ listing_reports ]
+[ users (buyer) ] (1) ──┐
+                         ├── (0..*) [ enquiry_threads ] (1) ──── (1..*) [ messages ]
+[ users (seller) ] (1) ─┘
+```
 
-### 3. `TokenRecord`
-| Field | Type | Description | Constraints |
-|---|---|---|---|
-| `tokenHash` | string | SHA-256 digest of raw token | PRIMARY KEY |
-| `userId` | string | Reference to `UserAccount.id` | FOREIGN KEY |
-| `type` | string | `VERIFICATION` \| `PASSWORD_RESET` | REQUIRED |
-| `expiresAt` | number | Unix timestamp (24h or 1h) | REQUIRED |
-| `used` | boolean | Single-use consumption flag | DEFAULT false |
+---
+
+## 2. Table Definitions & Constraints
+
+### 2.1. `users`
+Represents every registered account in the system (buyers, merchants, and staff).
+
+```sql
+CREATE TYPE user_role AS ENUM ('BUYER', 'DEALER', 'ADMIN');
+
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  phone VARCHAR(32) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  full_name VARCHAR(128) NOT NULL,
+  role user_role NOT NULL DEFAULT 'BUYER',
+  is_email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+  is_phone_verified BOOLEAN NOT NULL DEFAULT FALSE,
+  token_version INTEGER NOT NULL DEFAULT 1,
+  avatar_url TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_phone ON users(phone);
+```
+
+### 2.2. `seller_profiles`
+Maintains verified tech hub store information linked 1-to-1 with a user.
+
+```sql
+CREATE TYPE hub_region AS ENUM (
+  'LAGOS_COMPUTER_VILLAGE',
+  'LAGOS_VICTORIA_ISLAND',
+  'ABUJA_BANEX',
+  'PH_GARRISON',
+  'IBADAN_IWO_ROAD'
+);
+
+CREATE TYPE verification_status AS ENUM (
+  'UNVERIFIED',
+  'PENDING_REVIEW',
+  'VERIFIED',
+  'REJECTED'
+);
+
+CREATE TABLE seller_profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  store_name VARCHAR(128) NOT NULL,
+  owner_name VARCHAR(128) NOT NULL,
+  cac_number VARCHAR(64),
+  hub_region hub_region NOT NULL,
+  physical_address TEXT NOT NULL,
+  store_phone VARCHAR(32) NOT NULL,
+  store_whatsapp VARCHAR(32) NOT NULL,
+  verification_status verification_status NOT NULL DEFAULT 'PENDING_REVIEW',
+  verification_notes TEXT,
+  verified_at TIMESTAMPTZ,
+  verified_by UUID REFERENCES users(id),
+  store_photo_url TEXT,
+  rating NUMERIC(3, 2) NOT NULL DEFAULT 5.00,
+  review_count INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_seller_hub ON seller_profiles(hub_region);
+CREATE INDEX idx_seller_status ON seller_profiles(verification_status);
+```
+
+### 2.3. `phone_listings`
+Smartphone advertisements with hardware specifications and condition classifications.
+
+```sql
+CREATE TYPE phone_condition AS ENUM (
+  'BRAND_NEW',
+  'UK_USED',
+  'LOCALLY_USED'
+);
+
+CREATE TYPE listing_status AS ENUM (
+  'ACTIVE',
+  'INACTIVE',
+  'SOLD',
+  'REMOVED_BY_ADMIN'
+);
+
+CREATE TYPE phone_brand AS ENUM (
+  'APPLE',
+  'SAMSUNG',
+  'GOOGLE',
+  'TECNO',
+  'INFINIX',
+  'XIAOMI',
+  'ONEPLUS',
+  'OTHER'
+);
+
+CREATE TABLE phone_listings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  seller_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  brand phone_brand NOT NULL,
+  model VARCHAR(128) NOT NULL,
+  price_ngn BIGINT NOT NULL CHECK (price_ngn > 0),
+  condition phone_condition NOT NULL,
+  storage VARCHAR(32) NOT NULL,
+  ram VARCHAR(32),
+  battery_health INTEGER CHECK (battery_health BETWEEN 50 AND 100),
+  color VARCHAR(64) NOT NULL,
+  hub_region hub_region NOT NULL,
+  location_name VARCHAR(128) NOT NULL,
+  physical_test_address TEXT NOT NULL,
+  description TEXT NOT NULL,
+  status listing_status NOT NULL DEFAULT 'ACTIVE',
+  features JSONB NOT NULL DEFAULT '[]'::jsonb,
+  specs JSONB NOT NULL DEFAULT '{}'::jsonb,
+  view_count INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_listings_brand ON phone_listings(brand);
+CREATE INDEX idx_listings_condition ON phone_listings(condition);
+CREATE INDEX idx_listings_price ON phone_listings(price_ngn);
+CREATE INDEX idx_listings_status ON phone_listings(status);
+CREATE INDEX idx_listings_hub ON phone_listings(hub_region);
+CREATE INDEX idx_listings_seller ON phone_listings(seller_id);
+```
+
+### 2.4. `listing_images`
+Multiple high-resolution photos per smartphone listing.
+
+```sql
+CREATE TABLE listing_images (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  listing_id UUID NOT NULL REFERENCES phone_listings(id) ON DELETE CASCADE,
+  url TEXT NOT NULL,
+  is_cover BOOLEAN NOT NULL DEFAULT FALSE,
+  display_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_images_listing ON listing_images(listing_id);
+```
+
+### 2.5. `favourites`
+User wishlists for price tracking and store inspection planning.
+
+```sql
+CREATE TABLE favourites (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  listing_id UUID NOT NULL REFERENCES phone_listings(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT uq_user_favourite UNIQUE (user_id, listing_id)
+);
+```
+
+### 2.6. `enquiry_threads` & `messages`
+Direct in-store buyer-to-dealer messaging system.
+
+```sql
+CREATE TABLE enquiry_threads (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  listing_id UUID NOT NULL REFERENCES phone_listings(id) ON DELETE CASCADE,
+  buyer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  seller_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  is_closed BOOLEAN NOT NULL DEFAULT FALSE,
+  last_message_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT uq_buyer_listing_thread UNIQUE (buyer_id, listing_id)
+);
+
+CREATE TABLE messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  thread_id UUID NOT NULL REFERENCES enquiry_threads(id) ON DELETE CASCADE,
+  sender_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL CHECK (length(trim(content)) > 0),
+  is_read BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_messages_thread ON messages(thread_id);
+```
+
+### 2.7. `listing_reports`
+Buyer safety shield reporting suspicious IMEIs, fake sellers, or stolen devices.
+
+```sql
+CREATE TYPE report_reason AS ENUM (
+  'COUNTERFEIT_OR_FAKE',
+  'STOLEN_DEVICE',
+  'BLACKLISTED_IMEI',
+  'MISLEADING_CONDITION',
+  'SCAM_OR_PREPAYMENT_DEMAND',
+  'OTHER'
+);
+
+CREATE TABLE listing_reports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  listing_id UUID NOT NULL REFERENCES phone_listings(id) ON DELETE CASCADE,
+  reporter_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  reason report_reason NOT NULL,
+  details TEXT NOT NULL,
+  is_resolved BOOLEAN NOT NULL DEFAULT FALSE,
+  resolution_notes TEXT,
+  resolved_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  resolved_at TIMESTAMPTZ
+);
+```

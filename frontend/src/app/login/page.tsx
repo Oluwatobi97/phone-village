@@ -4,28 +4,21 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
+import MobileBottomNav from '../../components/MobileBottomNav';
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, demoLoginBuyer, demoLoginDealer } = useAuth();
+  const { darkMode, toggleDarkMode } = useTheme();
 
   const [role, setRole] = useState<'buyer' | 'dealer'>('buyer');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-
-  const getRedirectTarget = (userRole: 'buyer' | 'dealer') => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const target = params.get('redirect');
-      if (target) return target;
-    }
-    return userRole === 'dealer' ? '/sell/phones/new' : '/phones';
-  };
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,41 +30,25 @@ export default function LoginPage() {
     }
 
     setIsSubmitting(true);
-
-    // Simulate authenticating
     setTimeout(() => {
-      setIsSubmitting(false);
-      const isEmail = identifier.includes('@');
-      
       login({
-        id: 'usr-' + Math.random().toString(36).substring(2, 9),
-        name: isEmail ? identifier.split('@')[0] : 'Phone Village User',
-        email: isEmail ? identifier : 'user@phonevillage.ng',
-        phone: isEmail ? '+2348030001122' : identifier,
-        role: role,
-        storeName: role === 'dealer' ? 'Computer Village Hub' : undefined,
-        verified: role === 'dealer',
+        id: `usr-${Date.now()}`,
+        name: role === 'dealer' ? 'Emeka Okafor' : 'Victor Tobi',
+        email: identifier.includes('@') ? identifier : `${identifier}@phonevillage.ng`,
+        phone: identifier.includes('@') ? '+2348039871234' : identifier,
+        role,
+        storeName: role === 'dealer' ? 'Apex Gadgets Hub Ltd' : undefined,
+        storeAddress: role === 'dealer' ? 'Shop B12, Medical Road, Computer Village, Ikeja' : undefined,
       });
-
-      router.push(getRedirectTarget(role));
-    }, 800);
-  };
-
-  const handleDemoBuyer = () => {
-    demoLoginBuyer();
-    router.push(getRedirectTarget('buyer'));
-  };
-
-  const handleDemoDealer = () => {
-    demoLoginDealer();
-    router.push(getRedirectTarget('dealer'));
+      setIsSubmitting(false);
+      router.push(role === 'dealer' ? '/seller/listings' : '/phones');
+    }, 600);
   };
 
   return (
-    <div className={`min-h-screen flex flex-col justify-between font-sans transition-colors ${
+    <div className={`min-h-screen flex flex-col justify-between font-sans pb-16 md:pb-0 transition-colors ${
       darkMode ? 'bg-[#021B12] text-white' : 'bg-emerald-50/40 text-emerald-950'
     }`}>
-      {/* Top Bar Navigation */}
       <header className={`py-4 px-4 sm:px-8 border-b ${
         darkMode ? 'bg-emerald-950/90 border-emerald-800' : 'bg-white border-emerald-100'
       }`}>
@@ -85,62 +62,49 @@ export default function LoginPage() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setDarkMode(!darkMode)}
+              onClick={toggleDarkMode}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors cursor-pointer ${
-                darkMode 
-                  ? 'bg-emerald-900 border-emerald-700 text-emerald-200' 
-                  : 'bg-emerald-100 border-emerald-200 text-emerald-900'
+                darkMode ? 'bg-emerald-900 border-emerald-700 text-emerald-200' : 'bg-emerald-100 border-emerald-200 text-emerald-900'
               }`}
             >
               {darkMode ? '☀️ Light' : '🌙 Dark'}
             </button>
-
-            <Link
-              href="/"
-              className="text-xs font-bold text-emerald-600 hover:text-emerald-500 transition-colors"
-            >
-              ← Back to Marketplace
+            <Link href="/" className="text-xs font-bold text-emerald-400 hover:text-emerald-300">
+              ← Marketplace
             </Link>
           </div>
         </div>
       </header>
 
-      {/* Main Login Card */}
       <main className="flex-1 flex items-center justify-center p-4 my-8">
-        <div className={`w-full max-w-md p-6 sm:p-8 rounded-2xl border shadow-2xl transition-colors ${
-          darkMode 
-            ? 'bg-emerald-950/90 border-emerald-800 text-white' 
-            : 'bg-white border-emerald-200 text-emerald-950'
+        <div className={`w-full max-w-md p-6 sm:p-8 rounded-3xl border shadow-2xl transition-colors ${
+          darkMode ? 'bg-emerald-950/90 border-emerald-800 text-white' : 'bg-white border-emerald-200 text-emerald-950'
         }`}>
           
           <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-1 text-xs font-extrabold text-emerald-600 bg-emerald-100 px-3 py-1 rounded-full mb-2">
+            <div className="inline-flex items-center gap-1 text-xs font-extrabold text-emerald-400 bg-emerald-900/60 px-3 py-1 rounded-full mb-2 border border-emerald-800">
               <span>Secure Marketplace Login</span>
             </div>
             <h1 className="text-2xl font-extrabold tracking-tight">Welcome Back</h1>
-            <p className="text-xs text-emerald-600 mt-1">Sign in to manage your phone listings and inquiries</p>
+            <p className="text-xs text-emerald-300/80 mt-1">Sign in to manage your phone listings and store enquiries</p>
           </div>
 
-          {/* Account Role Tabs */}
-          <div className="grid grid-cols-2 gap-1 p-1 bg-emerald-900/10 border border-emerald-800/20 rounded-xl mb-6 text-xs">
+          {/* Account Role Selector */}
+          <div className="grid grid-cols-2 gap-1 p-1 bg-emerald-900/40 border border-emerald-800/60 rounded-2xl mb-6 text-xs">
             <button
               type="button"
               onClick={() => setRole('buyer')}
-              className={`py-2 text-center font-bold rounded-lg transition-colors cursor-pointer ${
-                role === 'buyer'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-emerald-700 hover:text-emerald-950'
+              className={`py-2 text-center font-bold rounded-xl transition-all ${
+                role === 'buyer' ? 'bg-emerald-600 text-white shadow' : 'text-emerald-300 hover:text-white'
               }`}
             >
-              Phone Buyer
+              Buyer Profile
             </button>
             <button
               type="button"
               onClick={() => setRole('dealer')}
-              className={`py-2 text-center font-bold rounded-lg transition-colors cursor-pointer ${
-                role === 'dealer'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-emerald-700 hover:text-emerald-950'
+              className={`py-2 text-center font-bold rounded-xl transition-all ${
+                role === 'dealer' ? 'bg-emerald-600 text-white shadow' : 'text-emerald-300 hover:text-white'
               }`}
             >
               Verified Dealer
@@ -148,124 +112,110 @@ export default function LoginPage() {
           </div>
 
           {errorMsg && (
-            <div className="p-3 mb-4 bg-emerald-800 text-white text-xs font-bold rounded-lg border border-emerald-600">
-              ⚠️ {errorMsg}
+            <div className="mb-4 p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-bold">
+              {errorMsg}
             </div>
           )}
 
-          <form onSubmit={handleLoginSubmit} className="space-y-4 text-xs">
-            {/* Phone or Email */}
+          <form onSubmit={handleLoginSubmit} className="space-y-4">
             <div>
-              <label className="block font-bold mb-1 text-emerald-700">
-                {role === 'dealer' ? 'Business Phone or Email' : 'Phone Number or Email'}
+              <label className="text-xs font-bold uppercase tracking-wider text-emerald-300 block mb-1.5">
+                Phone Number or Email
               </label>
               <input
                 type="text"
-                placeholder={role === 'dealer' ? 'e.g., +2348031234567 or shop@computer-village.ng' : 'e.g., +2348012345678 or name@gmail.com'}
+                required
+                placeholder="+2348012345678 or name@example.ng"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                required
-                className={`w-full px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium ${
-                  darkMode ? 'bg-emerald-900/60 border-emerald-700 text-white' : 'bg-white border-emerald-200'
+                className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
+                  darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
                 }`}
               />
             </div>
 
-            {/* Password */}
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="font-bold text-emerald-700">Password</label>
-                <a href="#" className="text-[11px] font-semibold text-emerald-600 hover:underline">
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-emerald-300">
+                  Password
+                </label>
+                <Link href="/forgot-password" className="text-[11px] text-emerald-400 font-bold hover:underline">
                   Forgot Password?
-                </a>
+                </Link>
               </div>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
+                  required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className={`w-full px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium ${
-                    darkMode ? 'bg-emerald-900/60 border-emerald-700 text-white' : 'bg-white border-emerald-200'
+                  className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none pr-10 ${
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-xs font-semibold text-emerald-600 hover:text-emerald-500 cursor-pointer"
+                  className="absolute right-3 top-3 text-xs opacity-60 hover:opacity-100"
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? '🙈' : '👁️'}
                 </button>
               </div>
             </div>
 
-            {/* Remember Me */}
-            <div className="flex items-center gap-2 pt-1">
-              <input
-                type="checkbox"
-                id="remember"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
-              />
-              <label htmlFor="remember" className="font-semibold text-emerald-700 cursor-pointer">
-                Keep me signed in on this device
-              </label>
-            </div>
-
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
+              className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all min-h-[44px]"
             >
-              {isSubmitting ? (
-                <span>Signing In...</span>
-              ) : (
-                <span>Sign In as {role === 'dealer' ? 'Verified Dealer' : 'Buyer'}</span>
-              )}
+              {isSubmitting ? 'Authenticating...' : 'Sign In to Account'}
             </button>
           </form>
 
-          {/* Quick Demo Login Shortcut */}
-          <div className="mt-6 pt-6 border-t border-emerald-800/20 text-center space-y-2">
-            <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider block">
-              Instant Demo Access
-            </span>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+          {/* Quick Demo Logins */}
+          <div className="mt-6 pt-6 border-t border-emerald-900/60 space-y-2">
+            <p className="text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              Instant 1-Click Demo Profiles
+            </p>
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={handleDemoBuyer}
-                className="py-2 px-2 bg-emerald-100 text-emerald-900 hover:bg-emerald-200 font-bold rounded-lg transition-colors cursor-pointer"
+                onClick={() => {
+                  demoLoginBuyer();
+                  router.push('/phones');
+                }}
+                className="p-2 text-xs font-bold rounded-xl border border-emerald-800 bg-emerald-950 text-emerald-300 hover:bg-emerald-900"
               >
                 Demo Buyer
               </button>
               <button
                 type="button"
-                onClick={handleDemoDealer}
-                className="py-2 px-2 bg-emerald-900 text-white hover:bg-emerald-800 font-bold rounded-lg transition-colors cursor-pointer"
+                onClick={() => {
+                  demoLoginDealer();
+                  router.push('/seller/listings');
+                }}
+                className="p-2 text-xs font-bold rounded-xl border border-emerald-700 bg-emerald-800 text-white hover:bg-emerald-700"
               >
                 Demo Dealer
               </button>
             </div>
           </div>
 
-          {/* Register Redirect */}
-          <p className="text-center text-xs font-semibold text-emerald-700 mt-6">
-            Don&apos;t have an account yet?{' '}
-            <Link href="/register" className="text-emerald-600 font-extrabold hover:underline">
-              Create New Account
+          <p className="text-center text-xs text-slate-400 mt-6">
+            New to Phone Village?{' '}
+            <Link href="/register" className="text-emerald-400 font-extrabold hover:underline">
+              Create Account
             </Link>
           </p>
 
         </div>
       </main>
 
-      {/* Clean Footer */}
-      <footer className="py-4 text-center text-xs text-emerald-700 border-t border-emerald-100">
-        <p>© {new Date().getFullYear()} Phone Village Nigeria · Green & White Verified Security</p>
+      <footer className="py-4 text-center text-xs text-emerald-400/80 border-t border-emerald-900/40">
+        <p>© {new Date().getFullYear()} Phone Village Nigeria · Secure Platform</p>
       </footer>
+      <MobileBottomNav />
     </div>
   );
 }

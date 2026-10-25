@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface UserProfile {
   id: string;
@@ -10,66 +10,80 @@ export interface UserProfile {
   role: 'buyer' | 'dealer';
   storeName?: string;
   storeAddress?: string;
-  verified?: boolean;
+  hubLocation?: string;
+  isVerified?: boolean;
 }
 
 interface AuthContextType {
   user: UserProfile | null;
-  login: (userData: UserProfile) => void;
+  login: (profile: UserProfile) => void;
   logout: () => void;
   demoLoginBuyer: () => void;
   demoLoginDealer: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  login: () => {},
+  logout: () => {},
+  demoLoginBuyer: () => {},
+  demoLoginDealer: () => {},
+});
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<UserProfile | null>(() => {
-    if (typeof window === 'undefined') return null;
-    const saved = localStorage.getItem('pv_user');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        localStorage.removeItem('pv_user');
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedUser = localStorage.getItem('pv_user');
+      if (savedUser) {
+        try {
+          setUser(JSON.parse(savedUser));
+        } catch {
+          // ignore corrupted json
+        }
       }
     }
-    return null;
-  });
+  }, []);
 
-  const login = (userData: UserProfile) => {
-    setUser(userData);
-    localStorage.setItem('pv_user', JSON.stringify(userData));
+  const login = (profile: UserProfile) => {
+    setUser(profile);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('pv_user', JSON.stringify(profile));
+    }
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('pv_user');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('pv_user');
+    }
   };
 
   const demoLoginBuyer = () => {
-    const demoBuyer: UserProfile = {
-      id: 'usr-buyer-1',
-      name: 'Chidi Okonkwo',
-      email: 'chidi.o@gmail.com',
-      phone: '+2348039876543',
+    const buyer: UserProfile = {
+      id: 'usr-buyer-001',
+      name: 'Tobi Victor',
+      email: 'victor.tobi@example.ng',
+      phone: '+2348039871234',
       role: 'buyer',
     };
-    login(demoBuyer);
+    login(buyer);
   };
 
   const demoLoginDealer = () => {
-    const demoDealer: UserProfile = {
-      id: 'usr-dealer-1',
-      name: 'Emeka Nnamdi',
-      email: 'emeka@apexistore.ng',
+    const dealer: UserProfile = {
+      id: 'usr-dealer-001',
+      name: 'Emeka Okafor',
+      email: 'emeka@apexgadgets.ng',
       phone: '+2348031234567',
       role: 'dealer',
-      storeName: 'Apex iStore Ikeja',
-      storeAddress: 'Shop 14, Otigba Street, Computer Village, Ikeja, Lagos',
-      verified: true,
+      storeName: 'Apex Gadgets Hub Ltd',
+      storeAddress: 'Shop B12, Medical Road, Computer Village, Ikeja',
+      hubLocation: 'Computer Village, Ikeja, Lagos',
+      isVerified: true,
     };
-    login(demoDealer);
+    login(dealer);
   };
 
   return (
@@ -77,12 +91,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+export const useAuth = () => useContext(AuthContext);

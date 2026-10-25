@@ -4,351 +4,507 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import TiltCard from '../../components/TiltCard';
+import MobileBottomNav from '../../components/MobileBottomNav';
 import ListingDetailModal from '../../components/ListingDetailModal';
+import { useTheme } from '../../context/ThemeContext';
 import { MOCK_LISTINGS } from '../../data/mockData';
 import { PhoneListing } from '../../types/phone';
 
-export default function BrowsePhonesPage() {
-  const [darkMode, setDarkMode] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+export default function MarketplacePage() {
+  const { darkMode, toggleDarkMode } = useTheme();
+
+  // Search & Filter States
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('All');
   const [selectedCondition, setSelectedCondition] = useState('All');
   const [selectedRegion, setSelectedRegion] = useState('All');
-  const [onlyVerified, setOnlyVerified] = useState(false);
-  const [maxPrice, setMaxPrice] = useState(1500000);
-  const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating'>('price-asc');
-  const [selectedListing, setSelectedListing] = useState<PhoneListing | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number>(2000000);
+  const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'battery'>('featured');
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+
+  // Mobile Filter Sheet Toggle
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [selectedListing, setSelectedListing] = useState<PhoneListing | null>(null);
+
+  const brands = ['All', 'Apple', 'Samsung', 'Google', 'Tecno', 'Infinix', 'Xiaomi'];
+  const conditions = ['All', 'Brand New', 'UK Used', 'Locally Used'];
+  const regions = ['All', 'Lagos', 'Abuja', 'Port Harcourt', 'Ibadan'];
 
   const filteredListings = useMemo(() => {
     return MOCK_LISTINGS.filter((item) => {
-      // Search query
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        const matchesTitle = item.title.toLowerCase().includes(q);
-        const matchesBrand = item.brand.toLowerCase().includes(q);
-        const matchesLocation = item.location.toLowerCase().includes(q);
-        const matchesStore = item.sellerStore.toLowerCase().includes(q);
-        if (!matchesTitle && !matchesBrand && !matchesLocation && !matchesStore) return false;
-      }
+      const matchSearch =
+        searchTerm === '' ||
+        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.sellerStore.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.location.toLowerCase().includes(searchTerm.toLowerCase());
 
-      // Max price
-      if (item.priceNgn > maxPrice) return false;
+      const matchBrand = selectedBrand === 'All' || item.brand === selectedBrand;
+      const matchCondition = selectedCondition === 'All' || item.condition === selectedCondition;
+      const matchRegion = selectedRegion === 'All' || item.hubRegion === selectedRegion;
+      const matchPrice = item.priceNgn <= maxPrice;
+      const matchVerified = !verifiedOnly || item.verifiedSeller;
 
-      // Brand
-      if (selectedBrand !== 'All' && item.brand !== selectedBrand) return false;
-
-      // Condition
-      if (selectedCondition !== 'All' && item.condition !== selectedCondition) return false;
-
-      // Region
-      if (selectedRegion !== 'All' && item.hubRegion !== selectedRegion) return false;
-
-      // Only verified sellers
-      if (onlyVerified && !item.verifiedSeller) return false;
-
-      return true;
+      return matchSearch && matchBrand && matchCondition && matchRegion && matchPrice && matchVerified;
     }).sort((a, b) => {
       if (sortBy === 'price-asc') return a.priceNgn - b.priceNgn;
       if (sortBy === 'price-desc') return b.priceNgn - a.priceNgn;
-      if (sortBy === 'rating') return b.rating - a.rating;
-      return 0;
+      if (sortBy === 'battery') return (b.batteryHealth || 100) - (a.batteryHealth || 100);
+      return 0; // featured
     });
-  }, [searchQuery, maxPrice, selectedBrand, selectedCondition, selectedRegion, onlyVerified, sortBy]);
+  }, [searchTerm, selectedBrand, selectedCondition, selectedRegion, maxPrice, sortBy, verifiedOnly]);
 
   const formatNaira = (amount: number) => {
     return '₦' + amount.toLocaleString('en-NG');
   };
 
-  const handleResetFilters = () => {
-    setSearchQuery('');
+  const resetFilters = () => {
+    setSearchTerm('');
     setSelectedBrand('All');
     setSelectedCondition('All');
     setSelectedRegion('All');
-    setOnlyVerified(false);
-    setMaxPrice(1500000);
-    setSortBy('price-asc');
+    setMaxPrice(2000000);
+    setVerifiedOnly(false);
+    setSortBy('featured');
   };
 
   return (
-    <div className={`min-h-screen font-sans transition-colors ${
-      darkMode ? 'bg-[#021B12] text-white' : 'bg-slate-50 text-emerald-950'
+    <div className={`min-h-screen font-sans pb-16 md:pb-0 transition-colors ${
+      darkMode ? 'bg-[#021B12] text-slate-100' : 'bg-slate-50 text-slate-900'
     }`}>
-      <Header darkMode={darkMode} onToggleDarkMode={() => setDarkMode(!darkMode)} />
+      <Header darkMode={darkMode} onToggleDarkMode={toggleDarkMode} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Breadcrumb & Title */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 mb-1">
-            <Link href="/" className="hover:underline">Home</Link>
-            <span>/</span>
-            <span>Browse Phones</span>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <div className="flex items-center gap-2 text-xs text-emerald-400 font-bold mb-1">
+              <Link href="/" className="hover:underline">Home</Link>
+              <span>/</span>
+              <span>Marketplace</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Nigeria Smartphone Marketplace
+            </h1>
+            <p className="text-xs sm:text-sm text-emerald-300/80 mt-1">
+              Showing {filteredListings.length} authentic smartphones from verified Lagos, Abuja & PH stores.
+            </p>
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                Phone Marketplace Directory
-              </h1>
-              <p className="text-xs sm:text-sm text-emerald-700 mt-1">
-                Explore {filteredListings.length} phones listed across Computer Village Ikeja, Victoria Island, Abuja, and Port Harcourt.
-              </p>
+
+          {/* Search Bar & Mobile Filter Trigger */}
+          <div className="flex items-center gap-2">
+            <div className={`relative flex-1 sm:w-64 border rounded-xl p-1.5 flex items-center ${
+              darkMode ? 'bg-emerald-950/60 border-emerald-800' : 'bg-white border-emerald-200'
+            }`}>
+              <span className="pl-2 text-sm opacity-60">🔍</span>
+              <input
+                type="text"
+                placeholder="Search phones..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-transparent px-2 text-xs font-semibold outline-none"
+              />
+              {searchTerm && (
+                <button onClick={() => setSearchTerm('')} className="text-xs text-slate-400 pr-2">✕</button>
+              )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
-                className="lg:hidden px-3.5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer"
-              >
-                <span>🔍 Filters ({selectedBrand !== 'All' || selectedCondition !== 'All' ? 'Active' : 'All'})</span>
-              </button>
-            </div>
+            <button
+              onClick={() => setMobileFilterOpen(true)}
+              className="lg:hidden px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md shrink-0 min-h-[44px]"
+            >
+              <span>⚙️ Filters</span>
+              <span className="w-5 h-5 rounded-full bg-black/40 text-[10px] flex items-center justify-center">
+                {(selectedBrand !== 'All' ? 1 : 0) + (selectedCondition !== 'All' ? 1 : 0) + (selectedRegion !== 'All' ? 1 : 0)}
+              </span>
+            </button>
           </div>
         </div>
 
-        {/* Main Grid: Filters Sidebar + Listings */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
-          {/* Desktop Filters Sidebar */}
-          <aside className={`hidden lg:block lg:col-span-3 space-y-6 p-5 border rounded-2xl h-fit sticky top-20 ${
-            darkMode ? 'bg-emerald-950/80 border-emerald-800' : 'bg-white border-emerald-200 shadow-sm'
-          }`}>
-            <div className="flex items-center justify-between border-b border-emerald-800/30 pb-3">
-              <h2 className="text-sm font-extrabold">Filter Inventory</h2>
-              <button
-                onClick={handleResetFilters}
-                className="text-xs font-bold text-emerald-600 hover:underline cursor-pointer"
-              >
-                Reset All
-              </button>
-            </div>
-
-            {/* Maximum Budget */}
-            <div>
-              <div className="flex justify-between items-center mb-1 text-xs">
-                <label className="font-bold text-emerald-700">Max Budget</label>
-                <span className="font-mono font-extrabold text-emerald-600">{formatNaira(maxPrice)}</span>
+          {/* Desktop Left Sidebar Filters */}
+          <aside className="hidden lg:block space-y-6">
+            <div className={`p-6 rounded-3xl border space-y-6 ${
+              darkMode ? 'bg-emerald-950/40 border-emerald-800/60' : 'bg-white border-emerald-200 shadow-sm'
+            }`}>
+              <div className="flex items-center justify-between pb-3 border-b border-emerald-900/60">
+                <span className="text-sm font-black uppercase tracking-wider text-emerald-400">
+                  Filters
+                </span>
+                <button
+                  onClick={resetFilters}
+                  className="text-xs font-bold text-emerald-300 hover:text-white"
+                >
+                  Reset
+                </button>
               </div>
-              <input
-                type="range"
-                min={50000}
-                max={1500000}
-                step={25000}
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="w-full h-2 bg-emerald-900/20 rounded-lg appearance-none cursor-pointer accent-emerald-600"
-              />
-            </div>
 
-            {/* Brand Filter */}
-            <div>
-              <label className="block text-xs font-bold text-emerald-700 mb-2">Brand</label>
-              <div className="space-y-1">
-                {['All', 'Apple', 'Samsung', 'Tecno', 'Infinix', 'Xiaomi', 'Google'].map((b) => (
-                  <button
-                    key={b}
-                    onClick={() => setSelectedBrand(b)}
-                    className={`w-full text-left px-3 py-1.5 text-xs rounded-lg font-bold transition-colors cursor-pointer flex justify-between items-center ${
-                      selectedBrand === b
-                        ? 'bg-emerald-600 text-white'
-                        : darkMode ? 'text-emerald-200 hover:bg-emerald-900' : 'text-emerald-800 hover:bg-emerald-50'
-                    }`}
-                  >
-                    <span>{b}</span>
-                    {selectedBrand === b && <span>✓</span>}
-                  </button>
-                ))}
+              {/* Brand Filter */}
+              <div>
+                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                  Brand
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {brands.map((brand) => (
+                    <button
+                      key={brand}
+                      onClick={() => setSelectedBrand(brand)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                        selectedBrand === brand
+                          ? 'bg-emerald-600 text-white shadow-md'
+                          : 'bg-emerald-950/60 text-emerald-300 border border-emerald-800 hover:bg-emerald-900'
+                      }`}
+                    >
+                      {brand}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Condition Filter */}
-            <div>
-              <label className="block text-xs font-bold text-emerald-700 mb-2">Condition</label>
-              <div className="grid grid-cols-1 gap-1">
-                {['All', 'Brand New', 'UK Used'].map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setSelectedCondition(c)}
-                    className={`text-left px-3 py-1.5 text-xs rounded-lg font-bold transition-colors cursor-pointer flex justify-between items-center ${
-                      selectedCondition === c
-                        ? 'bg-emerald-600 text-white'
-                        : darkMode ? 'text-emerald-200 hover:bg-emerald-900' : 'text-emerald-800 hover:bg-emerald-50'
-                    }`}
-                  >
-                    <span>{c}</span>
-                    {selectedCondition === c && <span>✓</span>}
-                  </button>
-                ))}
+              {/* Condition */}
+              <div>
+                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                  Condition
+                </label>
+                <div className="space-y-1.5">
+                  {conditions.map((cond) => (
+                    <label
+                      key={cond}
+                      className="flex items-center gap-2 text-xs font-bold cursor-pointer hover:text-emerald-400"
+                    >
+                      <input
+                        type="radio"
+                        name="condition"
+                        checked={selectedCondition === cond}
+                        onChange={() => setSelectedCondition(cond)}
+                        className="accent-emerald-500"
+                      />
+                      <span>{cond}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Region Filter */}
-            <div>
-              <label className="block text-xs font-bold text-emerald-700 mb-2">Tech Hub Region</label>
-              <select
-                value={selectedRegion}
-                onChange={(e) => setSelectedRegion(e.target.value)}
-                className={`w-full px-3 py-2 border rounded-xl text-xs font-bold cursor-pointer ${
-                  darkMode ? 'bg-emerald-950 border-emerald-700 text-white' : 'bg-white border-emerald-200'
-                }`}
-              >
-                {['All', 'Lagos', 'Abuja', 'Port Harcourt', 'Ibadan'].map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Verified Dealer Checkbox */}
-            <div className="pt-2 border-t border-emerald-800/30">
-              <label className="flex items-center gap-2 text-xs font-bold text-emerald-700 cursor-pointer">
+              {/* Max Budget Slider */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300">
+                    Max Price
+                  </label>
+                  <span className="text-xs font-black text-emerald-400 font-mono">
+                    {formatNaira(maxPrice)}
+                  </span>
+                </div>
                 <input
-                  type="checkbox"
-                  checked={onlyVerified}
-                  onChange={(e) => setOnlyVerified(e.target.checked)}
-                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
+                  type="range"
+                  min="200000"
+                  max="2000000"
+                  step="50000"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(Number(e.target.value))}
+                  className="w-full accent-emerald-500 cursor-pointer"
                 />
-                <span>Only Show Verified Stores</span>
-              </label>
+              </div>
+
+              {/* Hub Region */}
+              <div>
+                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                  Tech Hub
+                </label>
+                <select
+                  value={selectedRegion}
+                  onChange={(e) => setSelectedRegion(e.target.value)}
+                  className={`w-full p-2.5 rounded-xl border text-xs font-bold outline-none ${
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                  }`}
+                >
+                  {regions.map((reg) => (
+                    <option key={reg} value={reg}>
+                      {reg === 'All' ? 'All Hubs (Lagos, Abuja, PH, Ibadan)' : reg}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Verified Seller Checkbox */}
+              <div className="pt-2 border-t border-emerald-900/60">
+                <label className="flex items-center gap-2 text-xs font-extrabold cursor-pointer text-emerald-300">
+                  <input
+                    type="checkbox"
+                    checked={verifiedOnly}
+                    onChange={(e) => setVerifiedOnly(e.target.checked)}
+                    className="accent-emerald-500 w-4 h-4 rounded"
+                  />
+                  <span>Verified Dealers Only</span>
+                </label>
+              </div>
             </div>
           </aside>
 
-          {/* Main Listings Grid */}
-          <div className="lg:col-span-9 space-y-6">
+          {/* Right Product Grid */}
+          <section className="lg:col-span-3 space-y-6">
             
-            {/* Search Bar & Sort Row */}
-            <div className={`p-4 border rounded-2xl flex flex-col sm:flex-row gap-4 items-center justify-between ${
-              darkMode ? 'bg-emerald-950/80 border-emerald-800' : 'bg-white border-emerald-200 shadow-sm'
+            {/* Sort Controls Bar */}
+            <div className={`p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-4 text-xs ${
+              darkMode ? 'bg-emerald-950/40 border-emerald-800/60' : 'bg-white border-emerald-200 shadow-sm'
             }`}>
-              <div className="relative w-full sm:w-80">
-                <input
-                  type="text"
-                  placeholder="Search model, store, location..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`w-full pl-9 pr-4 py-2 border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-                    darkMode ? 'bg-emerald-900/60 border-emerald-700 text-white' : 'bg-emerald-50/50 border-emerald-200'
-                  }`}
-                />
-                <span className="absolute left-3 top-2.5 text-xs text-emerald-500">🔍</span>
-              </div>
+              <span className="font-extrabold text-emerald-400">
+                {filteredListings.length} Smartphones Available
+              </span>
 
-              <div className="flex items-center gap-2 text-xs w-full sm:w-auto justify-between sm:justify-end">
-                <span className="font-bold text-emerald-700">Sort:</span>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400 font-bold">Sort By:</span>
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as 'price-asc' | 'price-desc' | 'rating')}
-                  className={`border rounded-xl px-3 py-1.5 text-xs font-bold cursor-pointer ${
-                    darkMode ? 'bg-emerald-950 border-emerald-700 text-white' : 'bg-white border-emerald-200'
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className={`px-3 py-1.5 rounded-xl border font-bold outline-none ${
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
                   }`}
                 >
+                  <option value="featured">Featured First</option>
                   <option value="price-asc">Price: Low to High</option>
                   <option value="price-desc">Price: High to Low</option>
-                  <option value="rating">Top Rated Stores</option>
+                  <option value="battery">Battery Health</option>
                 </select>
               </div>
             </div>
 
-            {/* Results Grid */}
+            {/* Phone Cards */}
             {filteredListings.length === 0 ? (
-              <div className={`p-12 border rounded-2xl text-center my-6 ${
-                darkMode ? 'bg-emerald-950/60 border-emerald-800' : 'bg-white border-emerald-200'
-              }`}>
-                <p className="text-base font-extrabold">No phones found matching your filters</p>
-                <p className="text-xs text-emerald-600 mt-1 mb-4">Try clearing filters or raising your max budget slider.</p>
+              <div className="text-center py-20 p-8 rounded-3xl border border-emerald-900/60 bg-emerald-950/20">
+                <div className="text-4xl mb-3">🔍</div>
+                <h3 className="text-lg font-bold">No phones match your filter criteria</h3>
+                <p className="text-xs text-emerald-300/70 mt-1">Try expanding your price range or clearing search filters.</p>
                 <button
-                  onClick={handleResetFilters}
-                  className="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-lg hover:bg-emerald-500 transition-colors cursor-pointer"
+                  onClick={resetFilters}
+                  className="mt-4 px-4 py-2 bg-emerald-600 text-white font-extrabold text-xs rounded-xl"
                 >
                   Clear All Filters
                 </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredListings.map((listing) => (
-                  <TiltCard key={listing.id}>
-                    <div className={`border rounded-2xl overflow-hidden shadow-sm hover:border-emerald-500 transition-all flex flex-col justify-between group h-full ${
-                      darkMode ? 'bg-emerald-950/90 border-emerald-800' : 'bg-white border-emerald-100'
-                    }`}>
-                      <div>
-                        {/* Image */}
-                        <div className="aspect-4/3 overflow-hidden bg-emerald-900/20 relative">
-                          <img
-                            src={listing.image}
-                            alt={listing.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            referrerPolicy="no-referrer"
-                          />
-                          <span className="absolute top-3 left-3 bg-emerald-600 text-white text-[11px] font-extrabold px-2 py-0.5 rounded shadow">
-                            {listing.condition}
+                {filteredListings.map((phone) => (
+                  <div
+                    key={phone.id}
+                    className={`group rounded-3xl border transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl overflow-hidden flex flex-col justify-between ${
+                      darkMode 
+                        ? 'bg-emerald-950/40 border-emerald-800/60 hover:border-emerald-500' 
+                        : 'bg-white border-emerald-200 hover:border-emerald-500 shadow-sm'
+                    }`}
+                  >
+                    <div 
+                      className="relative aspect-[4/3] bg-emerald-950/60 overflow-hidden cursor-pointer"
+                      onClick={() => setSelectedListing(phone)}
+                    >
+                      <img
+                        src={phone.image}
+                        alt={phone.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                        <span className="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider text-emerald-950 bg-emerald-400 shadow-md">
+                          {phone.condition}
+                        </span>
+                        {phone.batteryHealth && (
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-black text-white bg-black/60 backdrop-blur-md border border-white/20">
+                            ⚡ {phone.batteryHealth}%
                           </span>
-                          {listing.verifiedSeller && (
-                            <span className="absolute top-3 right-3 bg-emerald-950 text-emerald-300 border border-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded">
-                              Verified
-                            </span>
-                          )}
+                        )}
+                      </div>
+                      <span className="absolute bottom-3 right-3 px-2 py-1 rounded-md text-[10px] font-extrabold text-white bg-black/60 backdrop-blur-md">
+                        📍 {phone.hubRegion}
+                      </span>
+                    </div>
+
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                      <div>
+                        <div className="flex items-center justify-between text-xs text-emerald-400 font-bold mb-1">
+                          <span>{phone.brand}</span>
+                          <span>{phone.storage}</span>
                         </div>
 
-                        {/* Card Body */}
-                        <div className="p-4 space-y-2">
-                          <div className="flex items-center justify-between text-xs font-semibold text-emerald-600">
-                            <span>{listing.sellerStore}</span>
-                            <span>{listing.location.split(',')[0]}</span>
-                          </div>
+                        <h3
+                          onClick={() => setSelectedListing(phone)}
+                          className="font-extrabold text-sm sm:text-base leading-snug line-clamp-2 hover:text-emerald-400 cursor-pointer transition-colors"
+                        >
+                          {phone.title}
+                        </h3>
 
-                          <Link href={`/phones/${listing.id}`}>
-                            <h3 className="text-base font-extrabold line-clamp-1 hover:text-emerald-500 transition-colors">
-                              {listing.title}
-                            </h3>
-                          </Link>
+                        <p className="mt-2 text-xl font-black text-emerald-400 font-mono tracking-tight">
+                          {formatNaira(phone.priceNgn)}
+                        </p>
 
-                          <div className="flex items-baseline justify-between pt-1">
-                            <span className="text-lg font-black font-mono tabular-nums text-emerald-600">
-                              {formatNaira(listing.priceNgn)}
-                            </span>
-                            <span className="text-xs font-bold text-emerald-700">{listing.storage}</span>
-                          </div>
+                        <div className="mt-3 pt-2.5 border-t border-emerald-900/40 text-[11px] space-y-0.5">
+                          <p className="font-bold text-white truncate">{phone.sellerStore}</p>
+                          <p className="text-emerald-300/70 truncate">🏬 {phone.location}</p>
                         </div>
                       </div>
 
-                      {/* Card Footer */}
-                      <div className="p-4 pt-2 border-t border-emerald-100/20 flex items-center justify-between">
-                        <span className="text-xs font-bold text-emerald-600">★ {listing.rating}</span>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => setSelectedListing(listing)}
-                            className="px-2.5 py-1 bg-emerald-100 text-emerald-950 font-bold text-xs rounded-lg hover:bg-emerald-200 transition-colors cursor-pointer"
-                          >
-                            Quick View
-                          </button>
-                          <Link
-                            href={`/phones/${listing.id}`}
-                            className="px-3 py-1 bg-emerald-600 text-white font-bold text-xs rounded-lg hover:bg-emerald-500 transition-colors"
-                          >
-                            Details →
-                          </Link>
-                        </div>
+                      <div className="grid grid-cols-2 gap-2 pt-2">
+                        <button
+                          onClick={() => setSelectedListing(phone)}
+                          className="py-2.5 px-3 rounded-xl border border-emerald-800 bg-emerald-950/60 hover:bg-emerald-900 text-emerald-300 text-xs font-bold transition-colors min-h-[40px]"
+                        >
+                          Quick Specs
+                        </button>
+                        <a
+                          href={`https://wa.me/${phone.sellerWhatsapp}?text=${encodeURIComponent(`Hi ${phone.sellerStore}, is ${phone.title} available for inspection?`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="py-2.5 px-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-extrabold text-center flex items-center justify-center gap-1 min-h-[40px]"
+                        >
+                          WhatsApp
+                        </a>
                       </div>
                     </div>
-                  </TiltCard>
+                  </div>
                 ))}
               </div>
             )}
 
-          </div>
+          </section>
 
         </div>
 
-        {/* Modal for Quick View */}
-        <ListingDetailModal
-          listing={selectedListing}
-          darkMode={darkMode}
-          onClose={() => setSelectedListing(null)}
-        />
-
       </main>
 
+      {/* Mobile Slide-up Bottom Sheet for Filters */}
+      {mobileFilterOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className={`w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-6 border shadow-2xl transition-colors space-y-6 ${
+            darkMode ? 'bg-[#021B12] border-emerald-800 text-white' : 'bg-white border-emerald-200 text-emerald-950'
+          }`}>
+            <div className="flex items-center justify-between pb-3 border-b border-emerald-900/60">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-black uppercase tracking-wider text-emerald-400">
+                  Filter Smartphones
+                </span>
+              </div>
+              <button
+                onClick={() => setMobileFilterOpen(false)}
+                className="w-8 h-8 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-300 flex items-center justify-center font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Brand Filter */}
+            <div>
+              <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                Brand
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {brands.map((brand) => (
+                  <button
+                    key={brand}
+                    onClick={() => setSelectedBrand(brand)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      selectedBrand === brand
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'bg-emerald-950/60 text-emerald-300 border border-emerald-800'
+                    }`}
+                  >
+                    {brand}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Condition */}
+            <div>
+              <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                Condition
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {conditions.map((cond) => (
+                  <button
+                    key={cond}
+                    onClick={() => setSelectedCondition(cond)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      selectedCondition === cond
+                        ? 'bg-emerald-500 text-slate-950 font-black'
+                        : 'bg-emerald-950/60 text-emerald-300 border border-emerald-800'
+                    }`}
+                  >
+                    {cond}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Max Budget */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300">
+                  Max Budget
+                </label>
+                <span className="text-xs font-black text-emerald-400 font-mono">
+                  {formatNaira(maxPrice)}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="200000"
+                max="2000000"
+                step="50000"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                className="w-full accent-emerald-500 cursor-pointer"
+              />
+            </div>
+
+            {/* Hub Region */}
+            <div>
+              <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                Tech Hub
+              </label>
+              <select
+                value={selectedRegion}
+                onChange={(e) => setSelectedRegion(e.target.value)}
+                className={`w-full p-3 rounded-xl border text-xs font-bold outline-none ${
+                  darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                }`}
+              >
+                {regions.map((reg) => (
+                  <option key={reg} value={reg}>
+                    {reg === 'All' ? 'All Hubs (Lagos, Abuja, PH, Ibadan)' : reg}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Apply & Reset Buttons */}
+            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-emerald-900/60">
+              <button
+                onClick={resetFilters}
+                className="py-3 text-xs font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-800 rounded-xl"
+              >
+                Reset All
+              </button>
+              <button
+                onClick={() => setMobileFilterOpen(false)}
+                className="py-3 text-xs font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-lg"
+              >
+                Show {filteredListings.length} Phones
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick View Modal */}
+      <ListingDetailModal
+        listing={selectedListing}
+        onClose={() => setSelectedListing(null)}
+        darkMode={darkMode}
+      />
+
       <Footer darkMode={darkMode} />
+      <MobileBottomNav />
     </div>
   );
 }

@@ -1,28 +1,29 @@
-import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
-import { AuthProvider } from "../context/AuthContext";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
+import { Providers } from './providers';
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-jakarta",
-  display: "swap",
-});
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: "Phone Village | Trustworthy Nigerian Phone Marketplace & Finder",
-  description: "Discover, compare, and buy new & UK used smartphones from verified dealers in Computer Village Ikeja, Victoria Island, Abuja, and Port Harcourt.",
+  title: 'Phone Village - Nigeria Smartphone Marketplace & Tech Hub Directory',
+  description: 'Discover, buy, and sell verified brand new and clean UK-used smartphones across Computer Village Ikeja, Banex Abuja, and major Nigerian tech hubs.',
+  openGraph: {
+    title: 'Phone Village - Nigeria Smartphone Marketplace',
+    description: 'Verified smartphones, direct dealer contacts, and safe market trade in Nigeria.',
+  },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en-NG" className={jakarta.variable}>
-      <body className="font-sans antialiased">
-        <AuthProvider>{children}</AuthProvider>
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body className="min-h-screen bg-[#021B12] text-slate-100 transition-colors duration-200" suppressHydrationWarning>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

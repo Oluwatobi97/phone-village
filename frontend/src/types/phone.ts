@@ -22,6 +22,7 @@ export interface PhoneListing {
   rating: number;
   reviewCount: number;
   image: string;
+  gallery?: string[];
   description: string;
   status?: 'ACTIVE' | 'INACTIVE' | 'SOLD';
   features: string[];

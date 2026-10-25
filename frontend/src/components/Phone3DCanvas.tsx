@@ -3,355 +3,296 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
-interface Phone3DCanvasProps {
-  darkMode?: boolean;
-}
+export default function Phone3DCanvas() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [modelColor, setModelColor] = useState<'titanium' | 'gold' | 'emerald' | 'black'>('emerald');
+  const [isRotating, setIsRotating] = useState(true);
 
-export default function Phone3DCanvas({ darkMode = false }: Phone3DCanvasProps) {
-  const mountRef = useRef<HTMLDivElement>(null);
+  // References for animation
   const phoneGroupRef = useRef<THREE.Group | null>(null);
-  const isDraggingRef = useRef(false);
-  const previousMousePositionRef = useRef({ x: 0, y: 0 });
-  const [activePreset, setActivePreset] = useState<'iso' | 'front' | 'back'>('iso');
+  const bodyMaterialRef = useRef<THREE.MeshPhysicalMaterial | null>(null);
+
+  const colors = {
+    titanium: 0xd4d2cd,
+    gold: 0xf5e6c8,
+    emerald: 0x059669,
+    black: 0x18181b,
+  };
 
   useEffect(() => {
-    const container = mountRef.current;
-    if (!container) return;
+    if (!containerRef.current) return;
+    const container = containerRef.current;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
 
-    // Scene setup
+    // Scene, Camera, Renderer
     const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    camera.position.set(0, 0, 7);
 
-    // Camera
-    const camera = new THREE.PerspectiveCamera(
-      45,
-      container.clientWidth / container.clientHeight,
-      0.1,
-      1000
-    );
-    camera.position.set(0, 0, 7.5);
-
-    // Renderer
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      powerPreference: 'high-performance',
-    });
-    renderer.setSize(container.clientWidth, container.clientHeight);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
-
+    container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    // Lighting
+    // Lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0x10b981, 2.5); // Emerald tint
-    keyLight.position.set(5, 5, 5);
-    scene.add(keyLight);
+    const mainLight = new THREE.DirectionalLight(0xffffff, 2.5);
+    mainLight.position.set(5, 5, 5);
+    scene.add(mainLight);
 
-    const fillLight = new THREE.DirectionalLight(0xffffff, 1.5);
-    fillLight.position.set(-5, -2, 3);
-    scene.add(fillLight);
-
-    const rimLight = new THREE.DirectionalLight(0x34d399, 2.0);
-    rimLight.position.set(0, 5, -5);
+    const rimLight = new THREE.DirectionalLight(0x10b981, 3.0);
+    rimLight.position.set(-5, -5, -2);
     scene.add(rimLight);
 
-    // Composite 3D Smartphone Model Group
-    const phoneGroup = new THREE.Group();
+    const softLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    softLight.position.set(-5, 5, 3);
+    scene.add(softLight);
 
-    // Materials
-    const bodyMaterial = new THREE.MeshStandardMaterial({
-      color: darkMode ? 0x064e3b : 0x0f172a, // Deep Emerald or Dark Titanium
+    // Phone Group
+    const phoneGroup = new THREE.Group();
+    phoneGroupRef.current = phoneGroup;
+    scene.add(phoneGroup);
+
+    // Chassis geometry & materials
+    const bodyGeometry = new THREE.BoxGeometry(2.3, 4.7, 0.28);
+    const bodyMaterial = new THREE.MeshPhysicalMaterial({
+      color: colors[modelColor],
       metalness: 0.85,
       roughness: 0.2,
+      clearcoat: 0.5,
+      clearcoatRoughness: 0.1,
     });
+    bodyMaterialRef.current = bodyMaterial;
 
-    const frameMaterial = new THREE.MeshStandardMaterial({
-      color: 0x10b981, // Luminous Emerald frame
-      metalness: 0.9,
-      roughness: 0.15,
-    });
+    const phoneBody = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    phoneGroup.add(phoneBody);
 
-    const glassScreenMaterial = new THREE.MeshStandardMaterial({
-      color: 0x022c22,
-      metalness: 0.1,
-      roughness: 0.05,
-    });
-
-    const cameraLensMaterial = new THREE.MeshStandardMaterial({
-      color: 0x000000,
-      metalness: 0.95,
+    // Display Glass Screen
+    const screenGeometry = new THREE.PlaneGeometry(2.15, 4.5);
+    const screenMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x051b14,
       roughness: 0.1,
+      metalness: 0.9,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.05,
     });
+    const phoneScreen = new THREE.Mesh(screenGeometry, screenMaterial);
+    phoneScreen.position.z = 0.145;
+    phoneGroup.add(phoneScreen);
 
-    const cameraRingMaterial = new THREE.MeshStandardMaterial({
-      color: 0x34d399,
+    // Dynamic Island / Speaker Notch
+    const islandGeometry = new THREE.BoxGeometry(0.5, 0.12, 0.02);
+    const islandMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const dynamicIsland = new THREE.Mesh(islandGeometry, islandMaterial);
+    dynamicIsland.position.set(0, 2.05, 0.15);
+    phoneGroup.add(dynamicIsland);
+
+    // Camera Bump Island (Back)
+    const bumpGeometry = new THREE.BoxGeometry(1.0, 1.0, 0.08);
+    const bumpMaterial = new THREE.MeshPhysicalMaterial({
+      color: colors[modelColor],
+      metalness: 0.8,
+      roughness: 0.3,
+    });
+    const cameraBump = new THREE.Mesh(bumpGeometry, bumpMaterial);
+    cameraBump.position.set(-0.55, 1.6, -0.16);
+    phoneGroup.add(cameraBump);
+
+    // Triple Camera Lenses
+    const lensGeometry = new THREE.CylinderGeometry(0.18, 0.18, 0.06, 32);
+    const lensMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x111111,
+      metalness: 0.9,
+      roughness: 0.1,
+      clearcoat: 1.0,
+    });
+    const rimGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.04, 32);
+    const rimMaterial = new THREE.MeshStandardMaterial({
+      color: 0xd4d4d8,
       metalness: 0.9,
       roughness: 0.2,
     });
 
-    // 1. Phone Body Hull (Rounded Box Approximation)
-    const phoneWidth = 2.2;
-    const phoneHeight = 4.4;
-    const phoneDepth = 0.22;
-
-    const bodyGeo = new THREE.BoxGeometry(phoneWidth, phoneHeight, phoneDepth);
-    const bodyMesh = new THREE.Mesh(bodyGeo, bodyMaterial);
-    phoneGroup.add(bodyMesh);
-
-    // 2. Outer Frame Trim
-    const frameGeo = new THREE.BoxGeometry(phoneWidth + 0.04, phoneHeight + 0.04, phoneDepth - 0.02);
-    const frameMesh = new THREE.Mesh(frameGeo, frameMaterial);
-    phoneGroup.add(frameMesh);
-
-    // 3. Front Glass Display Screen
-    const screenGeo = new THREE.PlaneGeometry(phoneWidth - 0.1, phoneHeight - 0.1);
-    const screenMesh = new THREE.Mesh(screenGeo, glassScreenMaterial);
-    screenMesh.position.z = phoneDepth / 2 + 0.005;
-    phoneGroup.add(screenMesh);
-
-    // Create Canvas Texture for Phone Screen UI
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 1024;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      // Screen background
-      const gradient = ctx.createLinearGradient(0, 0, 0, 1024);
-      gradient.addColorStop(0, '#022c22');
-      gradient.addColorStop(0.5, '#064e3b');
-      gradient.addColorStop(1, '#021b12');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 512, 1024);
-
-      // Status Bar
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 28px sans-serif';
-      ctx.fillText('09:41', 40, 60);
-      ctx.fillText('5G 100%', 380, 60);
-
-      // Logo Card on Screen
-      ctx.fillStyle = '#10b981';
-      ctx.beginPath();
-      ctx.roundRect(40, 120, 432, 280, 32);
-      ctx.fill();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'black 48px sans-serif';
-      ctx.fillText('PHONE VILLAGE', 70, 220);
-      ctx.font = '24px sans-serif';
-      ctx.fillText('Verified Marketplace · Nigeria', 70, 280);
-
-      // Mock UI Card 1
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
-      ctx.beginPath();
-      ctx.roundRect(40, 440, 432, 140, 24);
-      ctx.fill();
-
-      ctx.fillStyle = '#34d399';
-      ctx.font = 'bold 32px sans-serif';
-      ctx.fillText('iPhone 15 Pro Max', 70, 500);
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 36px monospace';
-      ctx.fillText('₦1,150,000', 70, 550);
-
-      // Mock UI Card 2
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
-      ctx.beginPath();
-      ctx.roundRect(40, 610, 432, 140, 24);
-      ctx.fill();
-
-      ctx.fillStyle = '#34d399';
-      ctx.font = 'bold 32px sans-serif';
-      ctx.fillText('Samsung S24 Ultra', 70, 670);
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 36px monospace';
-      ctx.fillText('₦1,480,000', 70, 720);
-
-      // Screen Texture
-      const screenTexture = new THREE.CanvasTexture(canvas);
-      screenTexture.colorSpace = THREE.SRGBColorSpace;
-      const screenTextureMaterial = new THREE.MeshBasicMaterial({ map: screenTexture });
-      const screenUIMesh = new THREE.Mesh(screenGeo, screenTextureMaterial);
-      screenUIMesh.position.z = phoneDepth / 2 + 0.01;
-      phoneGroup.add(screenUIMesh);
-    }
-
-    // 4. Dynamic Island / Punchhole Notch
-    const notchGeo = new THREE.CapsuleGeometry(0.06, 0.25, 4, 8);
-    const notchMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-    const notchMesh = new THREE.Mesh(notchGeo, notchMat);
-    notchMesh.rotation.z = Math.PI / 2;
-    notchMesh.position.set(0, phoneHeight / 2 - 0.25, phoneDepth / 2 + 0.015);
-    phoneGroup.add(notchMesh);
-
-    // 5. Back Camera Bump (Rear)
-    const bumpGeo = new THREE.BoxGeometry(0.9, 1.0, 0.08);
-    const bumpMesh = new THREE.Mesh(bumpGeo, frameMaterial);
-    bumpMesh.position.set(-0.45, phoneHeight / 2 - 0.7, -phoneDepth / 2 - 0.04);
-    phoneGroup.add(bumpMesh);
-
-    // 3 Camera Lenses on Back
     const lensPositions = [
-      [-0.65, phoneHeight / 2 - 0.5],
-      [-0.65, phoneHeight / 2 - 0.9],
-      [-0.25, phoneHeight / 2 - 0.7],
+      [-0.75, 1.8],
+      [-0.75, 1.35],
+      [-0.35, 1.58],
     ];
 
-    lensPositions.forEach(([lx, ly]) => {
-      // Outer ring
-      const ringGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.06, 32);
-      const ringMesh = new THREE.Mesh(ringGeo, cameraRingMaterial);
-      ringMesh.rotation.x = Math.PI / 2;
-      ringMesh.position.set(lx, ly, -phoneDepth / 2 - 0.08);
-      phoneGroup.add(ringMesh);
+    lensPositions.forEach(([x, y]) => {
+      const lensRim = new THREE.Mesh(rimGeometry, rimMaterial);
+      lensRim.rotation.x = Math.PI / 2;
+      lensRim.position.set(x, y, -0.21);
+      phoneGroup.add(lensRim);
 
-      // Glass lens
-      const lensGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.07, 32);
-      const lensMesh = new THREE.Mesh(lensGeo, cameraLensMaterial);
-      lensMesh.rotation.x = Math.PI / 2;
-      lensMesh.position.set(lx, ly, -phoneDepth / 2 - 0.085);
-      phoneGroup.add(lensMesh);
+      const lens = new THREE.Mesh(lensGeometry, lensMaterial);
+      lens.rotation.x = Math.PI / 2;
+      lens.position.set(x, y, -0.22);
+      phoneGroup.add(lens);
     });
 
-    // Initial Isometric Orientation
-    phoneGroup.rotation.y = 0.4;
+    // Initial slight angle
+    phoneGroup.rotation.y = 0.5;
     phoneGroup.rotation.x = 0.2;
 
-    scene.add(phoneGroup);
-    phoneGroupRef.current = phoneGroup;
+    // Interaction handling (Mouse & Touch)
+    let isDragging = false;
+    let prevX = 0;
+    let prevY = 0;
 
-    // Pointer Interaction Handlers for 3D Drag Rotation
-    const handleMouseDown = (e: MouseEvent) => {
-      isDraggingRef.current = true;
-      previousMousePositionRef.current = { x: e.clientX, y: e.clientY };
+    const onPointerDown = (clientX: number, clientY: number) => {
+      isDragging = true;
+      prevX = clientX;
+      prevY = clientY;
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDraggingRef.current || !phoneGroupRef.current) return;
+    const onPointerMove = (clientX: number, clientY: number) => {
+      if (!isDragging || !phoneGroup) return;
+      const deltaX = clientX - prevX;
+      const deltaY = clientY - prevY;
 
-      const deltaX = e.clientX - previousMousePositionRef.current.x;
-      const deltaY = e.clientY - previousMousePositionRef.current.y;
+      phoneGroup.rotation.y += deltaX * 0.01;
+      phoneGroup.rotation.x += deltaY * 0.01;
 
-      phoneGroupRef.current.rotation.y += deltaX * 0.01;
-      phoneGroupRef.current.rotation.x += deltaY * 0.01;
-
-      previousMousePositionRef.current = { x: e.clientX, y: e.clientY };
+      prevX = clientX;
+      prevY = clientY;
     };
 
-    const handleMouseUp = () => {
-      isDraggingRef.current = false;
+    const onPointerUp = () => {
+      isDragging = false;
     };
+
+    const handleMouseDown = (e: MouseEvent) => onPointerDown(e.clientX, e.clientY);
+    const handleMouseMove = (e: MouseEvent) => onPointerMove(e.clientX, e.clientY);
+    const handleMouseUp = () => onPointerUp();
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        onPointerDown(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+    const handleTouchEnd = () => onPointerUp();
 
     container.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
 
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd);
+
     // Animation Loop
     let animationFrameId: number;
-    const clock = new THREE.Clock();
-
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-
-      // Gentle floating animation when not dragging
-      if (!isDraggingRef.current && phoneGroupRef.current) {
-        const elapsedTime = clock.getElapsedTime();
-        phoneGroupRef.current.position.y = Math.sin(elapsedTime * 1.5) * 0.12;
-        phoneGroupRef.current.rotation.y += 0.003;
+      if (isRotating && !isDragging && phoneGroup) {
+        phoneGroup.rotation.y += 0.008;
       }
-
       renderer.render(scene, camera);
     };
-
     animate();
 
     // Resize Handler
     const handleResize = () => {
       if (!container) return;
-      camera.aspect = container.clientWidth / container.clientHeight;
+      const newWidth = container.clientWidth;
+      const newHeight = container.clientHeight;
+      camera.aspect = newWidth / newHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setSize(newWidth, newHeight);
     };
-
     window.addEventListener('resize', handleResize);
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', handleResize);
       container.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('resize', handleResize);
-      if (container.contains(renderer.domElement)) {
-        container.removeChild(renderer.domElement);
-      }
+      container.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
       renderer.dispose();
+      bodyGeometry.dispose();
+      screenGeometry.dispose();
+      islandGeometry.dispose();
+      bumpGeometry.dispose();
     };
-  }, [darkMode]);
+  }, [modelColor, isRotating]);
 
-  // Preset Angle Handlers
-  const setPresetAngle = (preset: 'iso' | 'front' | 'back') => {
-    setActivePreset(preset);
-    if (!phoneGroupRef.current) return;
-
-    if (preset === 'iso') {
-      phoneGroupRef.current.rotation.set(0.2, 0.4, 0);
-    } else if (preset === 'front') {
-      phoneGroupRef.current.rotation.set(0, 0, 0);
-    } else if (preset === 'back') {
-      phoneGroupRef.current.rotation.set(0, Math.PI, 0);
+  // Color change update
+  const changeColor = (color: 'titanium' | 'gold' | 'emerald' | 'black') => {
+    setModelColor(color);
+    if (bodyMaterialRef.current) {
+      bodyMaterialRef.current.color.setHex(colors[color]);
     }
   };
 
   return (
-    <div className="relative w-full h-[380px] sm:h-[440px] flex flex-col items-center justify-between">
-      {/* 3D Canvas Mount Point */}
-      <div 
-        ref={mountRef} 
-        className="w-full h-full cursor-grab active:cursor-grabbing rounded-2xl overflow-hidden"
+    <div className="relative w-full h-full flex flex-col items-center justify-center">
+      {/* 3D Canvas Container */}
+      <div
+        ref={containerRef}
+        className="w-full h-[280px] sm:h-[360px] lg:h-[420px] cursor-grab active:cursor-grabbing touch-pan-y"
       />
 
-      {/* Interactive Controls Overlay */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-emerald-950/90 border border-emerald-700/80 p-1.5 rounded-xl backdrop-blur-md shadow-xl text-xs z-10">
-        <span className="text-[11px] font-bold text-emerald-400 px-2 flex items-center gap-1">
-          <svg className="w-3.5 h-3.5 animate-spin text-emerald-400" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-          3D Inspect
-        </span>
+      {/* Floating 3D Controls */}
+      <div className="absolute bottom-2 inset-x-0 flex items-center justify-between px-4 sm:px-6 pointer-events-none">
+        {/* Color Palette Switcher */}
+        <div className="flex items-center gap-1.5 p-1 rounded-full bg-black/60 backdrop-blur-md border border-emerald-900/60 pointer-events-auto">
+          <button
+            onClick={() => changeColor('emerald')}
+            title="Lagos Emerald Green"
+            className={`w-6 h-6 rounded-full bg-emerald-600 transition-transform ${
+              modelColor === 'emerald' ? 'scale-125 ring-2 ring-white' : 'opacity-80'
+            }`}
+          />
+          <button
+            onClick={() => changeColor('titanium')}
+            title="Natural Titanium"
+            className={`w-6 h-6 rounded-full bg-[#d4d2cd] transition-transform ${
+              modelColor === 'titanium' ? 'scale-125 ring-2 ring-emerald-400' : 'opacity-80'
+            }`}
+          />
+          <button
+            onClick={() => changeColor('gold')}
+            title="Desert Gold"
+            className={`w-6 h-6 rounded-full bg-[#f5e6c8] transition-transform ${
+              modelColor === 'gold' ? 'scale-125 ring-2 ring-emerald-400' : 'opacity-80'
+            }`}
+          />
+          <button
+            onClick={() => changeColor('black')}
+            title="Obsidian Black"
+            className={`w-6 h-6 rounded-full bg-[#18181b] transition-transform ${
+              modelColor === 'black' ? 'scale-125 ring-2 ring-emerald-400' : 'opacity-80'
+            }`}
+          />
+        </div>
 
+        {/* Rotation Toggle */}
         <button
-          onClick={() => setPresetAngle('iso')}
-          className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer ${
-            activePreset === 'iso' ? 'bg-emerald-500 text-emerald-950' : 'text-emerald-200 hover:text-white'
-          }`}
+          onClick={() => setIsRotating(!isRotating)}
+          className="pointer-events-auto text-[11px] font-bold px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-emerald-900/60 text-emerald-300 hover:text-white"
         >
-          3D View
-        </button>
-
-        <button
-          onClick={() => setPresetAngle('front')}
-          className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer ${
-            activePreset === 'front' ? 'bg-emerald-500 text-emerald-950' : 'text-emerald-200 hover:text-white'
-          }`}
-        >
-          Front Display
-        </button>
-
-        <button
-          onClick={() => setPresetAngle('back')}
-          className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer ${
-            activePreset === 'back' ? 'bg-emerald-500 text-emerald-950' : 'text-emerald-200 hover:text-white'
-          }`}
-        >
-          Rear Camera
+          {isRotating ? '⏸ Pause' : '▶ Spin 360°'}
         </button>
       </div>
+
+      <p className="text-[10px] text-emerald-400/80 mt-1 pointer-events-none">
+        👆 Drag to rotate 360° · Select finish
+      </p>
     </div>
   );
 }
