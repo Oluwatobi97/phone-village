@@ -1,5 +1,5 @@
 {
-  "name": "phone-village-frontend",
+  "name": "frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -15,7 +15,10 @@
     "next": "15.1.0",
     "three": "0.170.0",
     "clsx": "2.1.1",
-    "tailwind-merge": "2.5.5"
+    "tailwind-merge": "2.5.5",
+    "drizzle-orm": "^0.45.4",
+    "@neondatabase/serverless": "^1.2.0",
+    "dotenv": "^18.0.9"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
@@ -27,6 +30,8 @@
     "eslint-config-next": "15.1.0",
     "postcss": "8.4.38",
     "tailwindcss": "4.0.0",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "drizzle-kit": "^0.31.11",
+    "tsx": "^4.23.15"
   }
 }
