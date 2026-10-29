@@ -99,7 +99,9 @@ export default function CreateListingPage() {
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         <div className="mb-8">
-          <div className="flex items-center gap-2 text-xs text-emerald-400 font-bold mb-1">
+          <div className={`flex items-center gap-2 text-xs font-bold mb-1 ${
+            darkMode ? 'text-emerald-400' : 'text-emerald-700'
+          }`}>
             <Link href="/seller/listings" className="hover:underline">My Listings</Link>
             <span>/</span>
             <span>Post New Phone Ad</span>
@@ -107,25 +109,31 @@ export default function CreateListingPage() {
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
             List a Smartphone for Sale
           </h1>
-          <p className="text-xs sm:text-sm text-emerald-300/80 mt-1">
+          <p className={`text-xs sm:text-sm mt-1 ${
+            darkMode ? 'text-emerald-300/80' : 'text-slate-600'
+          }`}>
             Reach thousands of serious buyers in Computer Village, Banex Plaza, and nationwide.
           </p>
         </div>
 
         {successMsg ? (
-          <div className="p-8 rounded-3xl bg-emerald-950/60 border border-emerald-500/80 text-center space-y-4 animate-in fade-in">
+          <div className={`p-8 rounded-3xl border text-center space-y-4 animate-in fade-in ${
+            darkMode ? 'bg-emerald-950/60 border-emerald-500/80 text-white' : 'bg-white border-emerald-300 shadow-lg text-slate-900'
+          }`}>
             <div className="text-4xl">🎉</div>
-            <h2 className="text-xl font-black text-emerald-400">Phone Ad Published Successfully!</h2>
-            <p className="text-xs text-emerald-200">Redirecting to your seller inventory dashboard...</p>
+            <h2 className={`text-xl font-black ${darkMode ? 'text-emerald-400' : 'text-emerald-700'}`}>Phone Ad Published Successfully!</h2>
+            <p className={`text-xs ${darkMode ? 'text-emerald-200' : 'text-slate-600'}`}>Redirecting to your seller inventory dashboard...</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className={`p-6 sm:p-8 rounded-3xl border space-y-6 ${
-            darkMode ? 'bg-emerald-950/40 border-emerald-800/80' : 'bg-white border-emerald-200 shadow-sm'
+            darkMode ? 'bg-emerald-950/40 border-emerald-800/80' : 'bg-white border-slate-200 shadow-sm'
           }`}>
             
             {/* Phone Title */}
             <div>
-              <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+              <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
+                darkMode ? 'text-emerald-300' : 'text-slate-700'
+              }`}>
                 Listing Title
               </label>
               <input
@@ -135,7 +143,7 @@ export default function CreateListingPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none focus:border-emerald-500 ${
-                  darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                  darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                 }`}
               />
             </div>
@@ -143,14 +151,16 @@ export default function CreateListingPage() {
             {/* Brand & Model */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
+                  darkMode ? 'text-emerald-300' : 'text-slate-700'
+                }`}>
                   Brand
                 </label>
                 <select
                   value={brand}
                   onChange={(e) => setBrand(e.target.value as any)}
-                  className={`w-full p-3 rounded-xl border text-xs font-bold outline-none ${
-                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                  className={`w-full p-3 rounded-xl border text-xs font-bold outline-none cursor-pointer ${
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
                 >
                   <option value="Apple">Apple iPhone</option>
@@ -164,7 +174,9 @@ export default function CreateListingPage() {
               </div>
 
               <div>
-                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
+                  darkMode ? 'text-emerald-300' : 'text-slate-700'
+                }`}>
                   Model
                 </label>
                 <input
@@ -174,7 +186,7 @@ export default function CreateListingPage() {
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
                   className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none focus:border-emerald-500 ${
-                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
                 />
               </div>
@@ -183,7 +195,9 @@ export default function CreateListingPage() {
             {/* Price & Condition */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
+                  darkMode ? 'text-emerald-300' : 'text-slate-700'
+                }`}>
                   Price in Naira (₦)
                 </label>
                 <input
@@ -193,20 +207,22 @@ export default function CreateListingPage() {
                   value={priceNgn}
                   onChange={(e) => setPriceNgn(e.target.value)}
                   className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none focus:border-emerald-500 ${
-                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
                 />
               </div>
 
               <div>
-                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
+                  darkMode ? 'text-emerald-300' : 'text-slate-700'
+                }`}>
                   Condition
                 </label>
                 <select
                   value={condition}
                   onChange={(e) => setCondition(e.target.value as any)}
-                  className={`w-full p-3 rounded-xl border text-xs font-bold outline-none ${
-                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                  className={`w-full p-3 rounded-xl border text-xs font-bold outline-none cursor-pointer ${
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
                 >
                   <option value="Brand New">Brand New Sealed</option>
@@ -219,7 +235,9 @@ export default function CreateListingPage() {
             {/* Storage, RAM & Battery Health */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
+                  darkMode ? 'text-emerald-300' : 'text-slate-700'
+                }`}>
                   Storage
                 </label>
                 <input
@@ -228,13 +246,15 @@ export default function CreateListingPage() {
                   value={storage}
                   onChange={(e) => setStorage(e.target.value)}
                   className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
                 />
               </div>
 
               <div>
-                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
+                  darkMode ? 'text-emerald-300' : 'text-slate-700'
+                }`}>
                   RAM
                 </label>
                 <input
@@ -243,13 +263,15 @@ export default function CreateListingPage() {
                   value={ram}
                   onChange={(e) => setRam(e.target.value)}
                   className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
                 />
               </div>
 
               <div>
-                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
+                  darkMode ? 'text-emerald-300' : 'text-slate-700'
+                }`}>
                   Battery Health (%)
                 </label>
                 <input
@@ -258,7 +280,7 @@ export default function CreateListingPage() {
                   value={batteryHealth}
                   onChange={(e) => setBatteryHealth(e.target.value)}
                   className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
                 />
               </div>
@@ -267,14 +289,16 @@ export default function CreateListingPage() {
             {/* Tech Hub & Physical Store Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
+                  darkMode ? 'text-emerald-300' : 'text-slate-700'
+                }`}>
                   Tech Hub Region
                 </label>
                 <select
                   value={hubRegion}
                   onChange={(e) => setHubRegion(e.target.value as any)}
-                  className={`w-full p-3 rounded-xl border text-xs font-bold outline-none ${
-                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                  className={`w-full p-3 rounded-xl border text-xs font-bold outline-none cursor-pointer ${
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
                 >
                   <option value="Lagos">Lagos (Computer Village / VI)</option>
@@ -285,7 +309,9 @@ export default function CreateListingPage() {
               </div>
 
               <div>
-                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
+                  darkMode ? 'text-emerald-300' : 'text-slate-700'
+                }`}>
                   Shop Address for Testing
                 </label>
                 <input
@@ -295,7 +321,7 @@ export default function CreateListingPage() {
                   value={sellerAddress}
                   onChange={(e) => setSellerAddress(e.target.value)}
                   className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
                 />
               </div>
@@ -304,7 +330,9 @@ export default function CreateListingPage() {
             {/* Contact Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
+                  darkMode ? 'text-emerald-300' : 'text-slate-700'
+                }`}>
                   WhatsApp Contact Number
                 </label>
                 <input
@@ -314,13 +342,15 @@ export default function CreateListingPage() {
                   value={sellerWhatsapp}
                   onChange={(e) => setSellerWhatsapp(e.target.value)}
                   className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
                 />
               </div>
 
               <div>
-                <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+                <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
+                  darkMode ? 'text-emerald-300' : 'text-slate-700'
+                }`}>
                   Phone Photo Image URL
                 </label>
                 <input
@@ -329,7 +359,7 @@ export default function CreateListingPage() {
                   value={image}
                   onChange={(e) => setImage(e.target.value)}
                   className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
                 />
               </div>
@@ -337,7 +367,9 @@ export default function CreateListingPage() {
 
             {/* Description */}
             <div>
-              <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 block mb-2">
+              <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
+                darkMode ? 'text-emerald-300' : 'text-slate-700'
+              }`}>
                 Condition Notes & Accessories Included
               </label>
               <textarea
@@ -346,7 +378,7 @@ export default function CreateListingPage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                  darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                  darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                 }`}
               />
             </div>

@@ -10,7 +10,7 @@ export default function Footer({ darkMode }: FooterProps) {
     <footer className={`border-t py-12 transition-colors ${
       darkMode 
         ? 'bg-[#01140d] border-emerald-950 text-emerald-100/70' 
-        : 'bg-emerald-950 border-emerald-900 text-emerald-100/70'
+        : 'bg-slate-900 border-slate-800 text-slate-300'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
@@ -18,14 +18,16 @@ export default function Footer({ darkMode }: FooterProps) {
           {/* Col 1: Brand Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-black text-sm">
+              <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-black text-sm shadow-xs">
                 PV
               </div>
               <span className="font-extrabold text-white text-lg tracking-tight">
                 Phone Village
               </span>
             </div>
-            <p className="text-xs leading-relaxed text-emerald-200/80">
+            <p className={`text-xs leading-relaxed ${
+              darkMode ? 'text-emerald-200/80' : 'text-slate-400'
+            }`}>
               Nigeria&apos;s most reliable smartphone marketplace connecting verified physical store dealers in Computer Village, Banex Plaza, and Garrison with smart buyers nationwide.
             </p>
             <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
@@ -38,7 +40,9 @@ export default function Footer({ darkMode }: FooterProps) {
             <h4 className="text-xs font-black uppercase tracking-wider text-emerald-400 mb-4">
               Physical Tech Hubs
             </h4>
-            <ul className="space-y-2 text-xs">
+            <ul className={`space-y-2 text-xs ${
+              darkMode ? 'text-emerald-200/70' : 'text-slate-400'
+            }`}>
               <li>
                 <Link href="/phones?region=Lagos" className="hover:text-white transition-colors">
                   Computer Village, Ikeja (Lagos)
@@ -72,7 +76,9 @@ export default function Footer({ darkMode }: FooterProps) {
             <h4 className="text-xs font-black uppercase tracking-wider text-emerald-400 mb-4">
               Phone Categories
             </h4>
-            <ul className="space-y-2 text-xs">
+            <ul className={`space-y-2 text-xs ${
+              darkMode ? 'text-emerald-200/70' : 'text-slate-400'
+            }`}>
               <li>
                 <Link href="/phones?condition=Brand+New" className="hover:text-white transition-colors">
                   Brand New Sealed Flagships
@@ -106,23 +112,29 @@ export default function Footer({ darkMode }: FooterProps) {
             <h4 className="text-xs font-black uppercase tracking-wider text-emerald-400 mb-4">
               Trust & Safe Trading
             </h4>
-            <p className="text-xs text-emerald-200/80 mb-3">
+            <p className={`text-xs mb-3 ${
+              darkMode ? 'text-emerald-200/80' : 'text-slate-400'
+            }`}>
               Always inspect IMEIs, Face ID/Fingerprint, and receipt documentation physically inside the dealer&apos;s verified store before payment.
             </p>
-            <div className="p-3 rounded-xl bg-emerald-900/40 border border-emerald-800 text-[11px] text-emerald-300">
+            <div className={`p-3 rounded-xl border text-[11px] ${
+              darkMode ? 'bg-emerald-900/40 border-emerald-800 text-emerald-300' : 'bg-slate-800/80 border-slate-700 text-slate-300'
+            }`}>
               <span className="font-extrabold text-white">Dealer Escrow & Direct WhatsApp:</span> Direct interaction with genuine business owners with registered CAC or verified market addresses.
             </div>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-emerald-900/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+        <div className={`pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-xs ${
+          darkMode ? 'border-emerald-900/60 text-emerald-300/70' : 'border-slate-800 text-slate-400'
+        }`}>
           <p>© {new Date().getFullYear()} Phone Village Nigeria. All rights reserved.</p>
-          <div className="flex items-center gap-4 text-emerald-300">
-            <Link href="/seller/onboarding" className="hover:underline">Dealer Verification</Link>
+          <div className="flex items-center gap-4">
+            <Link href="/seller/onboarding" className="hover:text-white hover:underline transition-colors">Dealer Verification</Link>
             <span>·</span>
-            <Link href="/sell/phones/new" className="hover:underline">Post Phone Ad</Link>
+            <Link href="/sell/phones/new" className="hover:text-white hover:underline transition-colors">Post Phone Ad</Link>
             <span>·</span>
-            <Link href="/account" className="hover:underline">My Account</Link>
+            <Link href="/account" className="hover:text-white hover:underline transition-colors">My Account</Link>
           </div>
         </div>
       </div>

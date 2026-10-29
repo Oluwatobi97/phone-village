@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import MobileBottomNav from '../components/MobileBottomNav';
 import Hero from '../components/Hero';
+import LatestPhoneUpdates from '../components/LatestPhoneUpdates';
 import ListingsSection from '../components/ListingsSection';
 import DealComparer from '../components/DealComparer';
 import VerifiedSellersSection from '../components/VerifiedSellersSection';
@@ -31,8 +32,13 @@ export default function HomePage() {
       {/* Top Global Header */}
       <Header darkMode={darkMode} onToggleDarkMode={toggleDarkMode} />
 
-      {/* Hero with 3D Smartphone Viewport & Search */}
+      {/* Hero with Search */}
       <Hero darkMode={darkMode} onSearch={handleSearch} />
+
+      {/* Full-Width Section: Latest Phones in the World (2025-2026 Global Releases & Specs) */}
+      <div id="global-phones-section">
+        <LatestPhoneUpdates darkMode={darkMode} onSearch={handleSearch} />
+      </div>
 
       {/* Marketplace Listings Section */}
       <div id="marketplace-listings">

@@ -50,22 +50,28 @@ export default function SellerOnboardingPage() {
       <main className="max-w-3xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-950 px-3 py-1 rounded-full mb-2 border border-emerald-800">
+          <div className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full mb-2 border ${
+            darkMode ? 'text-emerald-400 bg-emerald-950 border-emerald-800' : 'text-emerald-800 bg-emerald-50 border-emerald-200'
+          }`}>
             <span>Verified Merchant Badging</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
             Register Your Tech Hub Store
           </h1>
-          <p className="text-xs sm:text-sm text-emerald-300/80 mt-1 max-w-lg mx-auto">
+          <p className={`text-xs sm:text-sm mt-1 max-w-lg mx-auto ${
+            darkMode ? 'text-emerald-300/80' : 'text-slate-600'
+          }`}>
             Get the green verified checkmark, appear at the top of marketplace search, and receive direct buyer calls.
           </p>
         </div>
 
         {submitted ? (
-          <div className="p-8 rounded-3xl bg-emerald-950/60 border border-emerald-500/80 text-center space-y-4 animate-in fade-in">
+          <div className={`p-8 rounded-3xl border text-center space-y-4 animate-in fade-in ${
+            darkMode ? 'bg-emerald-950/60 border-emerald-500/80 text-white' : 'bg-white border-emerald-300 shadow-lg text-slate-900'
+          }`}>
             <div className="text-5xl">🛡️</div>
-            <h2 className="text-2xl font-black text-emerald-400">Store Verification Submitted!</h2>
-            <p className="text-xs sm:text-sm text-emerald-200 max-w-md mx-auto">
+            <h2 className={`text-2xl font-black ${darkMode ? 'text-emerald-400' : 'text-emerald-700'}`}>Store Verification Submitted!</h2>
+            <p className={`text-xs sm:text-sm max-w-md mx-auto ${darkMode ? 'text-emerald-200' : 'text-slate-600'}`}>
               Your store <strong>{storeName}</strong> has been granted immediate verified preview status. You can now post unlimited inventory ads.
             </p>
             <div className="pt-4 flex items-center justify-center gap-3">
@@ -77,7 +83,9 @@ export default function SellerOnboardingPage() {
               </Link>
               <Link
                 href="/seller/listings"
-                className="px-5 py-2.5 bg-emerald-950 border border-emerald-800 text-emerald-300 font-bold text-xs rounded-xl"
+                className={`px-5 py-2.5 border font-bold text-xs rounded-xl ${
+                  darkMode ? 'bg-emerald-950 border-emerald-800 text-emerald-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                }`}
               >
                 Go to Inventory
               </Link>
@@ -85,18 +93,22 @@ export default function SellerOnboardingPage() {
           </div>
         ) : (
           <form onSubmit={handleComplete} className={`p-6 sm:p-8 rounded-3xl border space-y-6 ${
-            darkMode ? 'bg-emerald-950/40 border-emerald-800/80' : 'bg-white border-emerald-200'
+            darkMode ? 'bg-emerald-950/40 border-emerald-800/80' : 'bg-white border-slate-200 shadow-sm'
           }`}>
             
             {/* Step 1: Store & CAC Identity */}
             <div className="space-y-4">
-              <h3 className="text-sm font-extrabold uppercase tracking-wider text-emerald-400 border-b border-emerald-900/60 pb-2">
+              <h3 className={`text-sm font-extrabold uppercase tracking-wider pb-2 border-b ${
+                darkMode ? 'text-emerald-400 border-emerald-900/60' : 'text-slate-900 border-slate-100'
+              }`}>
                 1. Business Identity & Hub Location
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-emerald-300 block mb-1.5">
+                  <label className={`text-xs font-bold block mb-1.5 ${
+                    darkMode ? 'text-emerald-300' : 'text-slate-700'
+                  }`}>
                     Store / Company Name
                   </label>
                   <input
@@ -106,13 +118,15 @@ export default function SellerOnboardingPage() {
                     value={storeName}
                     onChange={(e) => setStoreName(e.target.value)}
                     className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                      darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                      darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-emerald-300 block mb-1.5">
+                  <label className={`text-xs font-bold block mb-1.5 ${
+                    darkMode ? 'text-emerald-300' : 'text-slate-700'
+                  }`}>
                     Proprietor Full Name
                   </label>
                   <input
@@ -122,7 +136,7 @@ export default function SellerOnboardingPage() {
                     value={ownerName}
                     onChange={(e) => setOwnerName(e.target.value)}
                     className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                      darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                      darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}
                   />
                 </div>
@@ -130,7 +144,9 @@ export default function SellerOnboardingPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-emerald-300 block mb-1.5">
+                  <label className={`text-xs font-bold block mb-1.5 ${
+                    darkMode ? 'text-emerald-300' : 'text-slate-700'
+                  }`}>
                     CAC Registration (RC/BN Number)
                   </label>
                   <input
@@ -139,20 +155,22 @@ export default function SellerOnboardingPage() {
                     value={cacNumber}
                     onChange={(e) => setCacNumber(e.target.value)}
                     className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                      darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                      darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-emerald-300 block mb-1.5">
+                  <label className={`text-xs font-bold block mb-1.5 ${
+                    darkMode ? 'text-emerald-300' : 'text-slate-700'
+                  }`}>
                     Tech Hub Market
                   </label>
                   <select
                     value={hubLocation}
                     onChange={(e) => setHubLocation(e.target.value)}
-                    className={`w-full p-3 rounded-xl border text-xs font-bold outline-none ${
-                      darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                    className={`w-full p-3 rounded-xl border text-xs font-bold outline-none cursor-pointer ${
+                      darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}
                   >
                     <option value="Computer Village, Ikeja, Lagos">Computer Village, Ikeja, Lagos</option>
@@ -165,7 +183,9 @@ export default function SellerOnboardingPage() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-emerald-300 block mb-1.5">
+                <label className={`text-xs font-bold block mb-1.5 ${
+                  darkMode ? 'text-emerald-300' : 'text-slate-700'
+                }`}>
                   Exact Physical Shop Address (For Buyer Device Inspection)
                 </label>
                 <input
@@ -175,21 +195,27 @@ export default function SellerOnboardingPage() {
                   value={physicalAddress}
                   onChange={(e) => setPhysicalAddress(e.target.value)}
                   className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
                 />
               </div>
             </div>
 
             {/* Step 2: Contact Channels */}
-            <div className="space-y-4 pt-4 border-t border-emerald-900/60">
-              <h3 className="text-sm font-extrabold uppercase tracking-wider text-emerald-400 border-b border-emerald-900/60 pb-2">
+            <div className={`space-y-4 pt-4 border-t ${
+              darkMode ? 'border-emerald-900/60' : 'border-slate-100'
+            }`}>
+              <h3 className={`text-sm font-extrabold uppercase tracking-wider pb-2 border-b ${
+                darkMode ? 'text-emerald-400 border-emerald-900/60' : 'text-slate-900 border-slate-100'
+              }`}>
                 2. Direct Buyer Contact Numbers
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-emerald-300 block mb-1.5">
+                  <label className={`text-xs font-bold block mb-1.5 ${
+                    darkMode ? 'text-emerald-300' : 'text-slate-700'
+                  }`}>
                     Store Phone Line
                   </label>
                   <input
@@ -199,13 +225,15 @@ export default function SellerOnboardingPage() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                      darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                      darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-emerald-300 block mb-1.5">
+                  <label className={`text-xs font-bold block mb-1.5 ${
+                    darkMode ? 'text-emerald-300' : 'text-slate-700'
+                  }`}>
                     WhatsApp Business Number
                   </label>
                   <input
@@ -215,7 +243,7 @@ export default function SellerOnboardingPage() {
                     value={whatsapp}
                     onChange={(e) => setWhatsapp(e.target.value)}
                     className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                      darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-emerald-200'
+                      darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}
                   />
                 </div>
