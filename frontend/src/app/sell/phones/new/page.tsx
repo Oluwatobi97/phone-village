@@ -31,14 +31,55 @@ export default function CreateListingPage() {
   const [sellerPhone, setSellerPhone] = useState(user?.phone || '+2348000000000');
   const [sellerWhatsapp, setSellerWhatsapp] = useState('2348000000000');
   const [description, setDescription] = useState('');
-  const [image, setImage] = useState('https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&auto=format&fit=crop&q=80');
+  
+  // Real Images Upload Array State (Up to 4 Photos)
+  const [images, setImages] = useState<string[]>([
+    'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&auto=format&fit=crop&q=80'
+  ]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
 
+  // File Upload Handler (Up to 4 Real Photos)
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const remainingSlots = 4 - images.length;
+    if (remainingSlots <= 0) return;
+
+    const filesToProcess = Array.from(files).slice(0, remainingSlots);
+
+    filesToProcess.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setImages((prev) => {
+            if (prev.length >= 4) return prev;
+            return [...prev, reader.result as string];
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    e.target.value = '';
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (images.length === 0) {
+      alert('Please upload at least 1 real picture of the phone.');
+      return;
+    }
+
     setIsSubmitting(true);
+
+    const primaryImage = images[0];
 
     const newListing: PhoneListing = {
       id: `listing-${Date.now()}`,
@@ -61,8 +102,8 @@ export default function CreateListingPage() {
       sellerAddress,
       rating: 5.0,
       reviewCount: 1,
-      image,
-      gallery: [image],
+      image: primaryImage,
+      gallery: images,
       description,
       status: 'ACTIVE',
       features: ['Factory Unlocked', 'Physical Inspection Guaranteed', 'Instant Handover'],
@@ -129,6 +170,97 @@ export default function CreateListingPage() {
             darkMode ? 'bg-emerald-950/40 border-emerald-800/80' : 'bg-white border-slate-200 shadow-sm'
           }`}>
             
+            {/* Real Pictures Upload Section (Up to 4 Photos) */}
+            <div className={`p-5 rounded-2xl border space-y-3 ${
+              darkMode ? 'bg-emerald-950/60 border-emerald-800' : 'bg-slate-50 border-slate-200'
+            }`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className={`text-xs font-black uppercase tracking-wider block ${
+                    darkMode ? 'text-emerald-300' : 'text-slate-900'
+                  }`}>
+                    📸 Upload Real Photos of the Phone (Up to 4 Pictures)
+                  </label>
+                  <p className={`text-[11px] mt-0.5 ${darkMode ? 'text-emerald-200/70' : 'text-slate-500'}`}>
+                    Upload clear pictures showing screen, back camera, battery health settings, or receipt.
+                  </p>
+                </div>
+                <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border ${
+                  darkMode ? 'bg-emerald-900/80 border-emerald-700 text-emerald-300' : 'bg-white border-slate-200 text-slate-700'
+                }`}>
+                  {images.length}/4 Photos
+                </span>
+              </div>
+
+              {/* 4 Photo Slots Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                {[0, 1, 2, 3].map((slotIdx) => {
+                  const hasPhoto = images[slotIdx];
+                  return (
+                    <div
+                      key={slotIdx}
+                      className={`relative aspect-square rounded-2xl overflow-hidden border-2 border-dashed flex flex-col items-center justify-center transition-all ${
+                        hasPhoto
+                          ? darkMode ? 'border-emerald-500 bg-emerald-950' : 'border-emerald-500 bg-white'
+                          : darkMode ? 'border-emerald-800/80 bg-emerald-950/40 hover:border-emerald-500' : 'border-slate-300 bg-white hover:border-emerald-500'
+                      }`}
+                    >
+                      {hasPhoto ? (
+                        <>
+                          <img
+                            src={hasPhoto}
+                            alt={`Photo ${slotIdx + 1}`}
+                            className="w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
+                          <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded text-[9px] font-black uppercase bg-black/75 text-white backdrop-blur-md">
+                            {slotIdx === 0 ? 'Cover Photo' : `Photo ${slotIdx + 1}`}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(slotIdx)}
+                            className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-600 text-white font-bold text-xs flex items-center justify-center hover:bg-red-700 transition-colors shadow-md"
+                            title="Remove photo"
+                          >
+                            ✕
+                          </button>
+                        </>
+                      ) : (
+                        <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer p-2 text-center group">
+                          <span className="text-xl mb-1 group-hover:scale-110 transition-transform">📷</span>
+                          <span className={`text-[10px] font-bold ${darkMode ? 'text-emerald-300' : 'text-slate-600'}`}>
+                            {slotIdx === 0 ? '+ Add Cover' : `+ Photo ${slotIdx + 1}`}
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={handleImageUpload}
+                            className="hidden"
+                          />
+                        </label>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {images.length < 4 && (
+                <div className="pt-1">
+                  <label className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl cursor-pointer shadow-xs transition-colors">
+                    <span>➕ Add More Pictures from Device</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
+
             {/* Phone Title */}
             <div>
               <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
@@ -328,41 +460,22 @@ export default function CreateListingPage() {
             </div>
 
             {/* Contact Details */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
-                  darkMode ? 'text-emerald-300' : 'text-slate-700'
-                }`}>
-                  WhatsApp Contact Number
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="2348031234567"
-                  value={sellerWhatsapp}
-                  onChange={(e) => setSellerWhatsapp(e.target.value)}
-                  className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                  }`}
-                />
-              </div>
-
-              <div>
-                <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
-                  darkMode ? 'text-emerald-300' : 'text-slate-700'
-                }`}>
-                  Phone Photo Image URL
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={image}
-                  onChange={(e) => setImage(e.target.value)}
-                  className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
-                    darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                  }`}
-                />
-              </div>
+            <div>
+              <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
+                darkMode ? 'text-emerald-300' : 'text-slate-700'
+              }`}>
+                WhatsApp Contact Number
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="2348031234567"
+                value={sellerWhatsapp}
+                onChange={(e) => setSellerWhatsapp(e.target.value)}
+                className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${
+                  darkMode ? 'bg-emerald-950 border-emerald-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                }`}
+              />
             </div>
 
             {/* Description */}

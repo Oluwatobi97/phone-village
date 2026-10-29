@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { PhoneListing } from '../types/phone';
 
@@ -12,6 +12,15 @@ interface ListingDetailModalProps {
 
 export default function ListingDetailModal({ listing, onClose, darkMode }: ListingDetailModalProps) {
   if (!listing) return null;
+
+  const galleryImages = listing.gallery && listing.gallery.length > 0 ? listing.gallery : [listing.image];
+  const [selectedImage, setSelectedImage] = useState<string>(listing.image);
+
+  useEffect(() => {
+    if (listing) {
+      setSelectedImage(listing.image);
+    }
+  }, [listing]);
 
   const formatNaira = (amount: number) => {
     return '₦' + amount.toLocaleString('en-NG');
@@ -50,9 +59,9 @@ export default function ListingDetailModal({ listing, onClose, darkMode }: Listi
               darkMode ? 'border-emerald-900/60 bg-emerald-950/40' : 'border-slate-200 bg-slate-100'
             }`}>
               <img
-                src={listing.image}
+                src={selectedImage}
                 alt={listing.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-all"
                 referrerPolicy="no-referrer"
               />
               <span className={`absolute top-3 left-3 px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-wider ${
@@ -61,6 +70,25 @@ export default function ListingDetailModal({ listing, onClose, darkMode }: Listi
                 {listing.condition}
               </span>
             </div>
+
+            {/* Uploaded Gallery Thumbnails */}
+            {galleryImages.length > 1 && (
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+                {galleryImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedImage(img)}
+                    className={`w-14 h-14 rounded-xl overflow-hidden border-2 shrink-0 transition-all cursor-pointer ${
+                      selectedImage === img
+                        ? 'border-emerald-500 scale-95 shadow-md'
+                        : darkMode ? 'border-emerald-900/60 opacity-60 hover:opacity-100' : 'border-slate-200 opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={img} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Quick Spec Highlights */}
             <div className="grid grid-cols-2 gap-2 text-xs">
