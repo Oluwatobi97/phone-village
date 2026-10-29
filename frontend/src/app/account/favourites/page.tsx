@@ -8,9 +8,11 @@ import MobileBottomNav from '../../../components/MobileBottomNav';
 import { useTheme } from '../../../context/ThemeContext';
 import { PhoneListing } from '../../../types/phone';
 import { MOCK_LISTINGS } from '../../../data/mockData';
+import { useChat } from '../../../context/ChatContext';
 
 export default function FavouritesPage() {
   const { darkMode, toggleDarkMode } = useTheme();
+  const { startChatWithSeller } = useChat();
   const [favouriteListings, setFavouriteListings] = useState<PhoneListing[]>(() => {
     return MOCK_LISTINGS.slice(0, 3);
   });
@@ -92,14 +94,13 @@ export default function FavouritesPage() {
                     >
                       View Details
                     </Link>
-                    <a
-                      href={`https://wa.me/${phone.sellerWhatsapp}?text=${encodeURIComponent(`Hi ${phone.sellerStore}, I saw ${phone.title} in my Phone Village saved list. Is it available for inspection?`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="py-2.5 text-center text-xs font-extrabold text-white bg-[#25D366] rounded-xl flex items-center justify-center"
+                    <button
+                      type="button"
+                      onClick={() => startChatWithSeller(phone)}
+                      className="py-2.5 text-center text-xs font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl flex items-center justify-center cursor-pointer shadow-xs"
                     >
-                      WhatsApp
-                    </a>
+                      💬 Chat In-App
+                    </button>
                   </div>
                 </div>
               </div>

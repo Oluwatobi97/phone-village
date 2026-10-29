@@ -120,7 +120,7 @@ export default function Footer({ darkMode }: FooterProps) {
             <div className={`p-3 rounded-xl border text-[11px] ${
               darkMode ? 'bg-emerald-900/40 border-emerald-800 text-emerald-300' : 'bg-slate-800/80 border-slate-700 text-slate-300'
             }`}>
-              <span className="font-extrabold text-white">Dealer Escrow & Direct WhatsApp:</span> Direct interaction with genuine business owners with registered CAC or verified market addresses.
+              <span className="font-extrabold text-white">Dealer Verification & In-App Live Communication:</span> Direct interaction with genuine business owners with registered CAC or verified market addresses.
             </div>
           </div>
         </div>

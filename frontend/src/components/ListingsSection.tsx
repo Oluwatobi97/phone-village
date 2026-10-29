@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { PhoneListing } from '../types/phone';
 import ListingDetailModal from './ListingDetailModal';
+import { useChat } from '../context/ChatContext';
 
 interface ListingsSectionProps {
   listings: PhoneListing[];
@@ -12,6 +13,7 @@ interface ListingsSectionProps {
 }
 
 export default function ListingsSection({ listings, darkMode, searchFilter = '' }: ListingsSectionProps) {
+  const { startChatWithSeller } = useChat();
   const [selectedBrand, setSelectedBrand] = useState<string>('All');
   const [selectedCondition, setSelectedCondition] = useState<string>('All');
   const [selectedRegion, setSelectedRegion] = useState<string>('All');
@@ -260,14 +262,12 @@ export default function ListingsSection({ listings, darkMode, searchFilter = '' 
                     >
                       Quick Specs
                     </button>
-                    <a
-                      href={`https://wa.me/${phone.sellerWhatsapp}?text=${encodeURIComponent(`Hi ${phone.sellerStore}, is ${phone.title} still available for inspection on Phone Village?`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="py-2.5 px-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-extrabold text-center flex items-center justify-center gap-1 min-h-[40px] shadow-xs"
+                    <button
+                      onClick={() => startChatWithSeller(phone)}
+                      className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold text-center flex items-center justify-center gap-1 min-h-[40px] shadow-xs cursor-pointer"
                     >
-                      <span>WhatsApp</span>
-                    </a>
+                      <span>💬 Chat In-App</span>
+                    </button>
                   </div>
 
                 </div>

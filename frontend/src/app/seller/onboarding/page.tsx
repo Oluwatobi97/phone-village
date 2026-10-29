@@ -234,12 +234,11 @@ export default function SellerOnboardingPage() {
                   <label className={`text-xs font-bold block mb-1.5 ${
                     darkMode ? 'text-emerald-300' : 'text-slate-700'
                   }`}>
-                    WhatsApp Business Number
+                    Secondary Business Line (Optional)
                   </label>
                   <input
                     type="text"
-                    required
-                    placeholder="2348031234567"
+                    placeholder="+2348029876543"
                     value={whatsapp}
                     onChange={(e) => setWhatsapp(e.target.value)}
                     className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${

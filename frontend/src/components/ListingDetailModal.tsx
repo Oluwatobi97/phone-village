@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { PhoneListing } from '../types/phone';
+import { useChat } from '../context/ChatContext';
 
 interface ListingDetailModalProps {
   listing: PhoneListing | null;
@@ -11,6 +12,8 @@ interface ListingDetailModalProps {
 }
 
 export default function ListingDetailModal({ listing, onClose, darkMode }: ListingDetailModalProps) {
+  const { startChatWithSeller, startCall } = useChat();
+
   if (!listing) return null;
 
   const galleryImages = listing.gallery && listing.gallery.length > 0 ? listing.gallery : [listing.image];
@@ -25,10 +28,6 @@ export default function ListingDetailModal({ listing, onClose, darkMode }: Listi
   const formatNaira = (amount: number) => {
     return '₦' + amount.toLocaleString('en-NG');
   };
-
-  const whatsappMessage = encodeURIComponent(
-    `Hello ${listing.sellerStore}, I saw your listing for "${listing.title}" priced at ${formatNaira(listing.priceNgn)} on Phone Village. Is it currently available for physical inspection at your store?`
-  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
@@ -166,30 +165,36 @@ export default function ListingDetailModal({ listing, onClose, darkMode }: Listi
 
             {/* Direct Action Buttons */}
             <div className="space-y-2 pt-2">
-              <a
-                href={`https://wa.me/${listing.sellerWhatsapp}?text=${whatsappMessage}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3 bg-[#25D366] hover:bg-[#20ba59] text-white font-extrabold text-sm rounded-xl transition-all shadow-md flex items-center justify-center gap-2 min-h-[44px]"
+              <button
+                type="button"
+                onClick={() => {
+                  startChatWithSeller(listing);
+                  onClose();
+                }}
+                className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm rounded-xl transition-all shadow-md flex items-center justify-center gap-2 min-h-[44px] cursor-pointer"
               >
-                <span>💬 Chat Dealer on WhatsApp</span>
-              </a>
+                <span>💬 Chat Dealer In-App</span>
+              </button>
 
               <div className="grid grid-cols-2 gap-2">
-                <a
-                  href={`tel:${listing.sellerPhone}`}
-                  className={`py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 min-h-[40px] transition-colors ${
+                <button
+                  type="button"
+                  onClick={() => {
+                    startCall(listing.sellerStore, `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80`, 'voice');
+                    onClose();
+                  }}
+                  className={`py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 min-h-[40px] transition-colors cursor-pointer ${
                     darkMode 
                       ? 'border-emerald-700 bg-emerald-900/50 hover:bg-emerald-900 text-emerald-200' 
                       : 'border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-800'
                   }`}
                 >
-                  <span>📞 Call Store</span>
-                </a>
+                  <span>📞 Call Store In-App</span>
+                </button>
                 <Link
                   href={`/phones/${listing.id}`}
                   onClick={onClose}
-                  className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1 min-h-[40px] transition-colors shadow-xs"
+                  className="py-2.5 px-3 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1 min-h-[40px] transition-colors shadow-xs"
                 >
                   <span>Full Specs Page →</span>
                 </Link>

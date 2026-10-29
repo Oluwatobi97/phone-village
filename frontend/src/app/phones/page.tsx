@@ -10,8 +10,11 @@ import { useTheme } from '../../context/ThemeContext';
 import { MOCK_LISTINGS } from '../../data/mockData';
 import { PhoneListing } from '../../types/phone';
 
+import { useChat } from '../../context/ChatContext';
+
 export default function MarketplacePage() {
   const { darkMode, toggleDarkMode } = useTheme();
+  const { startChatWithSeller } = useChat();
 
   // Search & Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -403,14 +406,13 @@ export default function MarketplacePage() {
                         >
                           Quick Specs
                         </button>
-                        <a
-                          href={`https://wa.me/${phone.sellerWhatsapp}?text=${encodeURIComponent(`Hi ${phone.sellerStore}, is ${phone.title} available for inspection?`)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="py-2.5 px-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-extrabold text-center flex items-center justify-center gap-1 min-h-[40px] shadow-xs"
+                        <button
+                          type="button"
+                          onClick={() => startChatWithSeller(phone)}
+                          className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold text-center flex items-center justify-center gap-1 min-h-[40px] shadow-xs cursor-pointer"
                         >
-                          WhatsApp
-                        </a>
+                          💬 Chat In-App
+                        </button>
                       </div>
                     </div>
                   </div>

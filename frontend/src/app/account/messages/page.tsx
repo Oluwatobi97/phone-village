@@ -7,6 +7,8 @@ import Footer from '../../../components/Footer';
 import MobileBottomNav from '../../../components/MobileBottomNav';
 import { useTheme } from '../../../context/ThemeContext';
 
+import { useChat } from '../../../context/ChatContext';
+
 interface EnquiryMessage {
   id: string;
   sender: 'buyer' | 'seller';
@@ -84,6 +86,7 @@ const DEMO_THREADS: EnquiryThread[] = [
 
 export default function MessagesPage() {
   const { darkMode, toggleDarkMode } = useTheme();
+  const { startCall } = useChat();
 
   const [threads, setThreads] = useState<EnquiryThread[]>(DEMO_THREADS);
   const [activeThreadId, setActiveThreadId] = useState<string>('enq-001');
@@ -190,14 +193,22 @@ export default function MessagesPage() {
                 <h3 className="font-extrabold text-sm text-white">{activeThread.storeName}</h3>
                 <p className="text-[11px] text-emerald-300/70">📍 {activeThread.location} · {activeThread.phoneTitle}</p>
               </div>
-              <a
-                href={`https://wa.me/${activeThread.whatsapp}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3 py-1.5 rounded-xl bg-[#25D366] text-white font-extrabold text-xs flex items-center gap-1 shadow"
-              >
-                WhatsApp
-              </a>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => startCall(activeThread.storeName, activeThread.phoneImage, 'voice')}
+                  className="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-extrabold text-xs flex items-center gap-1 shadow cursor-pointer"
+                >
+                  📞 Call
+                </button>
+                <button
+                  type="button"
+                  onClick={() => startCall(activeThread.storeName, activeThread.phoneImage, 'video')}
+                  className="px-3 py-1.5 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center gap-1 shadow cursor-pointer"
+                >
+                  📹 Video
+                </button>
+              </div>
             </div>
 
             {/* Message Thread */}

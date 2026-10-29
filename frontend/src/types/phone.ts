@@ -16,7 +16,7 @@ export interface PhoneListing {
   sellerName: string;
   sellerStore: string;
   sellerPhone: string;
-  sellerWhatsapp: string;
+  sellerWhatsapp?: string;
   verifiedSeller: boolean;
   sellerAddress: string;
   rating: number;

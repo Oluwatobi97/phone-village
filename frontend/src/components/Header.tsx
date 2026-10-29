@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
+import { useChat } from '../context/ChatContext';
 
 interface HeaderProps {
   darkMode: boolean;
@@ -11,6 +12,7 @@ interface HeaderProps {
 
 export default function Header({ darkMode, onToggleDarkMode }: HeaderProps) {
   const { user, logout, demoLoginBuyer, demoLoginDealer } = useAuth();
+  const { openChat, totalUnreadCount } = useChat();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -60,13 +62,40 @@ export default function Header({ darkMode, onToggleDarkMode }: HeaderProps) {
           <Link href="/seller/onboarding" className="hover:text-emerald-600 transition-colors">
             Verified Stores
           </Link>
-          <Link href="/account" className="hover:text-emerald-600 transition-colors">
-            My Account
-          </Link>
+          <button
+            onClick={() => openChat()}
+            className="hover:text-emerald-600 transition-colors flex items-center gap-1 cursor-pointer"
+          >
+            <span>Messages & Calls</span>
+            {totalUnreadCount > 0 && (
+              <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black flex items-center justify-center">
+                {totalUnreadCount}
+              </span>
+            )}
+          </button>
         </nav>
 
         {/* Actions & Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Chat Launcher Button */}
+          <button
+            onClick={() => openChat()}
+            className={`p-2 sm:px-3 sm:py-1.5 text-xs font-bold rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 min-h-[40px] relative ${
+              darkMode 
+                ? 'bg-emerald-950/60 border-emerald-800 text-emerald-300 hover:bg-emerald-900' 
+                : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200/80'
+            }`}
+            title="In-App Live Chat & Calling System"
+          >
+            <span>💬</span>
+            <span className="hidden sm:inline">Live Chat</span>
+            {totalUnreadCount > 0 && (
+              <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black flex items-center justify-center">
+                {totalUnreadCount}
+              </span>
+            )}
+          </button>
+
           {/* Theme Toggle Button */}
           <button
             onClick={onToggleDarkMode}
@@ -158,6 +187,20 @@ export default function Header({ darkMode, onToggleDarkMode }: HeaderProps) {
                 darkMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-700'
               }`}>Explore</span>
             </Link>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                openChat();
+              }}
+              className="p-2 rounded-lg hover:bg-emerald-500/10 flex items-center justify-between text-left cursor-pointer"
+            >
+              <span>💬 Live Chat & Calls</span>
+              {totalUnreadCount > 0 && (
+                <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center">
+                  {totalUnreadCount}
+                </span>
+              )}
+            </button>
             <Link 
               href="/sell/phones/new" 
               onClick={() => setMobileMenuOpen(false)}
@@ -172,27 +215,6 @@ export default function Header({ darkMode, onToggleDarkMode }: HeaderProps) {
               className="p-2 rounded-lg hover:bg-emerald-500/10 flex items-center justify-between"
             >
               <span>🛡️ Verified Store Onboarding</span>
-            </Link>
-            <Link 
-              href="/seller/listings" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2 rounded-lg hover:bg-emerald-500/10 flex items-center justify-between"
-            >
-              <span>📋 My Seller Inventory</span>
-            </Link>
-            <Link 
-              href="/account/favourites" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2 rounded-lg hover:bg-emerald-500/10 flex items-center justify-between"
-            >
-              <span>❤️ Saved Wishlist</span>
-            </Link>
-            <Link 
-              href="/account/messages" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2 rounded-lg hover:bg-emerald-500/10 flex items-center justify-between"
-            >
-              <span>💬 Store Enquiries</span>
             </Link>
             <Link 
               href="/account" 

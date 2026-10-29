@@ -4,11 +4,14 @@ import React from 'react';
 import Link from 'next/link';
 import { MOCK_VERIFIED_SELLERS } from '../data/mockData';
 
+import { useChat } from '../context/ChatContext';
+
 interface VerifiedSellersSectionProps {
   darkMode: boolean;
 }
 
 export default function VerifiedSellersSection({ darkMode }: VerifiedSellersSectionProps) {
+  const { startCall } = useChat();
   return (
     <section className={`py-16 border-t transition-colors ${
       darkMode 
@@ -121,24 +124,24 @@ export default function VerifiedSellersSection({ darkMode }: VerifiedSellersSect
               <div className={`grid grid-cols-2 gap-2 pt-2 border-t ${
                 darkMode ? 'border-emerald-900/40' : 'border-slate-100'
               }`}>
-                <a
-                  href={`tel:${seller.phone}`}
-                  className={`py-2 text-center text-xs font-bold rounded-xl border transition-colors ${
+                <button
+                  type="button"
+                  onClick={() => startCall(seller.storeName, seller.storePhoto, 'voice')}
+                  className={`py-2 text-center text-xs font-bold rounded-xl border transition-colors cursor-pointer ${
                     darkMode 
                       ? 'text-emerald-200 bg-emerald-900/40 hover:bg-emerald-900 border-emerald-700' 
                       : 'text-slate-800 bg-slate-100 hover:bg-slate-200/80 border-slate-200'
                   }`}
                 >
-                  Call Store
-                </a>
-                <a
-                  href={`https://wa.me/${seller.whatsapp}?text=${encodeURIComponent(`Hello ${seller.storeName}, I found your verified store on Phone Village. I would like to inquire about your available smartphones.`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="py-2 text-center text-xs font-extrabold text-white bg-[#25D366] hover:bg-[#20ba59] rounded-xl flex items-center justify-center gap-1 shadow-xs"
+                  📞 Voice Call
+                </button>
+                <button
+                  type="button"
+                  onClick={() => startCall(seller.storeName, seller.storePhoto, 'video')}
+                  className="py-2 text-center text-xs font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl flex items-center justify-center gap-1 shadow-xs cursor-pointer"
                 >
-                  WhatsApp
-                </a>
+                  📹 Video Call
+                </button>
               </div>
 
             </div>

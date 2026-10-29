@@ -464,12 +464,11 @@ export default function CreateListingPage() {
               <label className={`text-xs font-extrabold uppercase tracking-wider block mb-2 ${
                 darkMode ? 'text-emerald-300' : 'text-slate-700'
               }`}>
-                WhatsApp Contact Number
+                Secondary Store Line (Optional)
               </label>
               <input
                 type="text"
-                required
-                placeholder="2348031234567"
+                placeholder="+2348031234567"
                 value={sellerWhatsapp}
                 onChange={(e) => setSellerWhatsapp(e.target.value)}
                 className={`w-full p-3 rounded-xl border text-xs font-semibold outline-none ${

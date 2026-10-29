@@ -7,10 +7,12 @@ import Footer from '../../../components/Footer';
 import MobileBottomNav from '../../../components/MobileBottomNav';
 import { useTheme } from '../../../context/ThemeContext';
 import { MOCK_LISTINGS } from '../../../data/mockData';
+import { useChat } from '../../../context/ChatContext';
 
 export default function PhoneDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
   const { darkMode, toggleDarkMode } = useTheme();
+  const { startChatWithSeller, startCall } = useChat();
 
   const listing = MOCK_LISTINGS.find((p) => p.id === unwrappedParams.id) || MOCK_LISTINGS[0];
   const [selectedImage, setSelectedImage] = useState<string>(listing.image);
@@ -21,10 +23,6 @@ export default function PhoneDetailPage({ params }: { params: Promise<{ id: stri
   };
 
   const images = listing.gallery && listing.gallery.length > 0 ? listing.gallery : [listing.image];
-
-  const whatsappMessage = encodeURIComponent(
-    `Hello ${listing.sellerStore}, I am viewing your listing for "${listing.title}" priced at ${formatNaira(listing.priceNgn)} on Phone Village. I want to inspect and buy it at your shop.`
-  );
 
   return (
     <div className={`min-h-screen font-sans pb-16 md:pb-0 transition-colors ${
@@ -67,7 +65,7 @@ export default function PhoneDetailPage({ params }: { params: Promise<{ id: stri
 
               <button
                 onClick={() => setIsSaved(!isSaved)}
-                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center justify-center text-lg hover:scale-110 transition-transform"
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center justify-center text-lg hover:scale-110 transition-transform cursor-pointer"
               >
                 {isSaved ? '❤️' : '🤍'}
               </button>
@@ -79,7 +77,7 @@ export default function PhoneDetailPage({ params }: { params: Promise<{ id: stri
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(img)}
-                  className={`w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all shrink-0 ${
+                  className={`w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
                     selectedImage === img
                       ? 'border-emerald-500 scale-95 shadow-lg'
                       : 'border-emerald-900/60 opacity-70 hover:opacity-100'
@@ -199,20 +197,29 @@ export default function PhoneDetailPage({ params }: { params: Promise<{ id: stri
 
               {/* Direct CTAs */}
               <div className="space-y-2 pt-2">
-                <a
-                  href={`https://wa.me/${listing.sellerWhatsapp}?text=${whatsappMessage}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3.5 bg-[#25D366] hover:bg-[#20ba59] text-white font-extrabold text-sm rounded-2xl shadow-xl flex items-center justify-center gap-2 min-h-[48px]"
+                <button
+                  type="button"
+                  onClick={() => startChatWithSeller(listing)}
+                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm rounded-2xl shadow-xl flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
                 >
-                  <span>💬 Chat Vendor on WhatsApp</span>
-                </a>
-                <a
-                  href={`tel:${listing.sellerPhone}`}
-                  className="w-full py-3 bg-emerald-900/60 hover:bg-emerald-900 text-emerald-200 border border-emerald-700 font-bold text-xs rounded-2xl flex items-center justify-center gap-2 min-h-[44px]"
-                >
-                  <span>📞 Call Store Directly: {listing.sellerPhone}</span>
-                </a>
+                  <span>💬 Chat Vendor In-App</span>
+                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => startCall(listing.sellerStore, `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80`, 'voice')}
+                    className="w-full py-3 bg-emerald-900/80 hover:bg-emerald-900 text-emerald-200 border border-emerald-700 font-bold text-xs rounded-2xl flex items-center justify-center gap-2 min-h-[44px] cursor-pointer"
+                  >
+                    <span>📞 Voice Call</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => startCall(listing.sellerStore, `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80`, 'video')}
+                    className="w-full py-3 bg-emerald-800/80 hover:bg-emerald-800 text-emerald-200 border border-emerald-600 font-bold text-xs rounded-2xl flex items-center justify-center gap-2 min-h-[44px] cursor-pointer"
+                  >
+                    <span>📹 Video Call</span>
+                  </button>
+                </div>
               </div>
             </div>
 

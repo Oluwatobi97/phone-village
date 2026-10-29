@@ -182,7 +182,7 @@ export default function Hero({ darkMode, onSearch }: HeroProps) {
                 darkMode ? 'bg-emerald-950/40 border-emerald-900/60' : 'bg-white border-slate-200/80 shadow-xs'
               }`}>
                 <p className={`text-base sm:text-lg font-black ${darkMode ? 'text-emerald-400' : 'text-emerald-700'}`}>₦0 Fee</p>
-                <p className={`text-[10px] sm:text-xs font-medium leading-tight ${darkMode ? 'text-emerald-200/80' : 'text-slate-600'}`}>Direct WhatsApp & In-Store Purchase</p>
+                <p className={`text-[10px] sm:text-xs font-medium leading-tight ${darkMode ? 'text-emerald-200/80' : 'text-slate-600'}`}>In-App Live Chat & In-Store Purchase</p>
               </div>
               <div className={`p-2.5 sm:p-3 rounded-xl border ${
                 darkMode ? 'bg-emerald-950/40 border-emerald-900/60' : 'bg-white border-slate-200/80 shadow-xs'
